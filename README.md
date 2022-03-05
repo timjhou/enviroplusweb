@@ -13,4 +13,4 @@ Also by default a gas sensor is expected. If you have and Enviro board without o
 
 Run `sudo ./install-service.sh` and it will be installed as a service that starts on boot.
 
-![Screenshot](image.png)
+![Screenshot](screenshot.jpg)
