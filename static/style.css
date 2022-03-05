@@ -58,7 +58,7 @@ h1 {
 
 .main {
   display: grid;
-  grid-template-columns: 16rem 1fr;
+  grid-template-columns: 19rem 1fr;
   grid-template-rows: 1fr;
   margin: 2rem;
 }
@@ -87,9 +87,7 @@ h1 {
     margin-right: 0;
   }  
 }
-.readings {
-  margin-bottom: 1rem;
-}
+
 .readings table {
   width: 100%;
 }
@@ -102,11 +100,11 @@ h1 {
 }
 .readings td {
   vertical-align: top;
-  padding-bottom: 0.35rem;
 }
 .readings hr {
   border-top: 1px solid silver;
   color: transparent;
+  margin: 0.25rem 0;
 }
 .scale-factors {
   width: 100%;
