@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# EnviroPlusWeb Copyright Chris Palmer 2019
-# nop.head@gmail.com
-# hydraraptor.blogspot.com
-#
-# This file is part of EnviroPlusWeb.
+# Forked from <https://github.com/nophead/EnviroPlusWeb>
 #
 # EnviroPlusWeb is free software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation, either version 3 of
@@ -14,12 +10,16 @@
 # without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along with EnviroPlusWeb.
-# If not, see <https:#www.gnu.org/licenses/>.
-#
-particle_sensor = True
+
+# If you prefer to keep the Enviro LCD screen off, change the next value to False
+lcd_screen = False
+# If you don't have a fan plugged on GPIO, change the next value to False
+fan_gpio = True
+# If you have an Enviro board without gas sensor, change the next value to False
 gas_sensor = True
-assert gas_sensor or not particle_sensor # cant have particle sensor without gas sensor
+# If you don't have a particle sensor PMS5003 attached, change the next value to False
+particulate_sensor = True
+assert gas_sensor or not particulate_sensor # Can't have particle sensor without gas sensor
 from flask import Flask, render_template, url_for, request
 import logging
 from bme280 import BME280
@@ -52,72 +52,86 @@ bme280 = BME280(i2c_dev=bus) # BME280 temperature, humidity and pressure sensor
 
 pms5003 = PMS5003() # PMS5003 particulate sensor
 
-IO.setmode(IO.BCM)   # Set pin numbering
-IO.setup(4,IO.OUT)   # Fan controller on GPIO 4
-pwm = IO.PWM(4,1000) # PWM frequency
-pwm.start(100)       # Duty cycle
+# Config the fan plugged to RPi
+if fan_gpio:
+    IO.setmode(IO.BCM)   # Set pin numbering
+    IO.setup(4,IO.OUT)   # Fan controller on GPIO 4
+    pwm = IO.PWM(4,1000) # PWM frequency
+    pwm.start(100)       # Duty cycle
+
+# Get the temperature of the CPU
+def get_cpu_temperature():
+    with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+        temp = f.read()
+        temp = int(temp) / 1000.0
+    return temp
+
+# Tuning factor for compensation the temperature and humidity
+factor_temp = 3.10
+factor_humi = 2
 
 # Create ST7735 LCD display class
-st7735 = ST7735.ST7735(
-    port=0,
-    cs=1,
-    dc=9,
-    backlight=12,
-    rotation=270,
-    spi_speed_hz=10000000
-)
+if lcd_screen:
+    st7735 = ST7735.ST7735(
+        port=0,
+        cs=1,
+        dc=9,
+        backlight=12,
+        rotation=270,
+        spi_speed_hz=10000000
+    )
 
-# Initialize display
-st7735.begin()
+    # Initialize display
+    st7735.begin()
 
-WIDTH = st7735.width
-HEIGHT = st7735.height
+    WIDTH = st7735.width
+    HEIGHT = st7735.height
 
-# Set up canvas and font
-img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
-draw = ImageDraw.Draw(img)
+    # Set up canvas and font
+    img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
+    draw = ImageDraw.Draw(img)
 
-path = os.path.dirname(os.path.realpath(__file__)) + "/fonts"
-smallfont = ImageFont.truetype(path + "/Asap/Asap-Bold.ttf", 10)
-x_offset = 2
-y_offset = 2
+    path = os.path.dirname(os.path.realpath(__file__)) + "/static/fonts"
+    smallfont = ImageFont.truetype(path + "/asap/Asap-Bold.ttf", 10)
+    x_offset = 2
+    y_offset = 2
 
-units = ["°C",
-         "%",
-         "mBar",
-         "Lux"]
-         
-if gas_sensor:
-    units += [
-         "kΩ",
-         "kΩ",
-         "kΩ"]
-         
-if particle_sensor:
-    units += [
-         "/0.ll",
-         "/0.1l",
-         "/0.1l"]
+    units = ["°C",
+            "%",
+            "mBar",
+            "Lux"]
+            
+    if gas_sensor:
+        units += [
+            "kΩ",
+            "kΩ",
+            "kΩ"]
+            
+    if particulate_sensor:
+        units += [
+            "/0.ll",
+            "/0.1l",
+            "/0.1l"]
 
-# Displays all the text on the 0.96" LCD
-def display_everything():
-    draw.rectangle((0, 0, WIDTH, HEIGHT), (0, 0, 0))
-    column_count = 2
-    variables = list(record.keys())
-    row_count = ceil(len(units) / column_count)
-    last_values = days[-1][-1]
-    for i in range(len(units)):
-        variable = variables[i + 1]
-        data_value = record[variable]
-        last_value = last_values[variable]
-        unit = units[i]
-        x = x_offset + (WIDTH // column_count) * (i // row_count)
-        y = y_offset + (HEIGHT // row_count) * (i % row_count)
-        message = "{}: {:s} {}".format(variable[:4], str(data_value), unit)
-        tol = 1.01
-        rgb = (255, 0, 255) if data_value > last_value * tol  else (0, 255, 255) if data_value < last_value / tol else (0, 255, 0)
-        draw.text((x, y), message, font = smallfont, fill = rgb)
-    st7735.display(img)
+    # Displays all the text on the 0.96" LCD
+    def display_everything():
+        draw.rectangle((0, 0, WIDTH, HEIGHT), (0, 0, 0))
+        column_count = 2
+        variables = list(record.keys())
+        row_count = ceil(len(units) / column_count)
+        last_values = days[-1][-1]
+        for i in range(len(units)):
+            variable = variables[i + 1]
+            data_value = record[variable]
+            last_value = last_values[variable]
+            unit = units[i]
+            x = x_offset + (WIDTH // column_count) * (i // row_count)
+            y = y_offset + (HEIGHT // row_count) * (i % row_count)
+            message = "{}: {:s} {}".format(variable[:4], str(data_value), unit)
+            tol = 1.01
+            rgb = (255, 0, 255) if data_value > last_value * tol  else (0, 255, 255) if data_value < last_value / tol else (0, 255, 0)
+            draw.text((x, y), message, font = smallfont, fill = rgb)
+        st7735.display(img)
 
 
 app = Flask(__name__)
@@ -127,9 +141,22 @@ log.disabled = True
 run_flag = True
 
 def read_data(time):
-    temperature = bme280.get_temperature()
+
+    if fan_gpio:
+        temperature = bme280.get_temperature()
+        humidity = bme280.get_humidity()
+    else:
+        cpu_temps = [get_cpu_temperature()] * 5  
+        cpu_temp = get_cpu_temperature()
+        # Smooth out with some averaging to decrease jitter
+        cpu_temps = cpu_temps[1:] + [cpu_temp]
+        avg_cpu_temp = sum(cpu_temps) / float(len(cpu_temps))
+        raw_temp = bme280.get_temperature()
+        temperature = raw_temp - ((avg_cpu_temp - raw_temp) / factor_temp)
+        raw_humi = bme280.get_humidity()
+        humidity = raw_humi + ((avg_cpu_temp - raw_temp) / factor_humi)
+
     pressure = bme280.get_pressure()
-    humidity = bme280.get_humidity()
     lux = ltr559.get_lux()
     
     if gas_sensor:
@@ -140,7 +167,7 @@ def read_data(time):
     else:
         oxi = red = nh3 = 0
         
-    if particle_sensor:
+    if particulate_sensor:
         while True:
             try:
                 particles = pms5003.read()
@@ -164,7 +191,7 @@ def read_data(time):
     record = {
         'time' : asctime(localtime(time)),
         'temp' : round(temperature,1),
-        'humi' : round(humidity, 1),
+        'humi' : round(humidity,1),
         'pres' : round(pressure,1),
         'lux'  : round(lux),
         'oxi'  : oxi,
@@ -179,7 +206,7 @@ def read_data(time):
     }
     return record
 
-record = read_data(time()) # throw away the first readings as not accurate
+record = read_data(time()) # Throw away the first readings as not accurate
 data = []
 days = []
 
@@ -229,7 +256,7 @@ def background():
     while run_flag:
         t = int(floor(time()))
         record = read_data(t)
-        data = data[-(samples - 1):] + [record]         # Keep five minutes
+        data = data[-(samples - 1):] + [record] # Keep five minutes
         if t % samples == samples - 1 and len(data) == samples: # At the end of a 5 minute period?
             totals = sum_data(data)
             fname = filename(t - (samples - 1))
@@ -240,7 +267,7 @@ def background():
                 days.append([])
             last_file = fname
             add_record(days[-1], totals)        # Add to today, filling any gap from last reading if been stopped
-        if days:
+        if lcd_screen and days:
             display_everything()
         sleep(max(t + 1 - time(), 0.1))
 
@@ -248,13 +275,15 @@ background_thread = threading.Thread(target = background)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', gas_sensor=gas_sensor, particulate_sensor=particulate_sensor, fan_gpio=fan_gpio)
 
 @app.route('/readings')
 def readings():
-    arg = request.args["fan"]
-    pwm.ChangeDutyCycle(int(arg))
-    return render_template('readings.html' if particle_sensor else 'readings_np.html' if gas_sensor else 'readings_ng.html', **record) 
+    if fan_gpio:
+        arg = request.args["fan"]
+        pwm.ChangeDutyCycle(int(arg))
+    # return render_template('readings.html' if particulate_sensor else 'readings_np.html' if gas_sensor else 'readings_ng.html', **record) 
+    return record
 
 def compress_data(ndays, nsamples):
     cdata = []
@@ -302,7 +331,7 @@ if __name__ == '__main__':
         days.append(read_day('data/' + f))
     background_thread.start()
     try:
-        app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
+        app.run(debug = False, host = '0.0.0.0', port = 81, use_reloader = False)
     except Exception as e:
         print(e)
         pass

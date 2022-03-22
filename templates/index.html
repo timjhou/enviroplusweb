@@ -1,29 +1,63 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
   <meta charset="utf-8" />
   <title>Enviro Plus Web</title>
-  <meta name="author" content="nophead" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <base href="/" />
   <meta name="keywords" content="Enviro+, EnviroPlus, RaspberryPi" />
   <meta name="description" content="Web interface for Enviro+ sensor board plugged into a Raspberry Pi" />
   <meta name="theme-color" content="#b0b0b0" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" href="/static/style.css" media="all" />
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}" media="all" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" media="all" />
 </head>
 
-<body>
+<body id="body" data-hasGasSensor="{{ gas_sensor }}" data-hasParticulateSensor="{{ particulate_sensor }}"
+  data-hasFanGPIO="{{ fan_gpio }}">
+  <script>
+    // Load user theme-color
+    const savedThemeColor = localStorage.getItem("theme-color");
+    const body = document.getElementById("body");
+    if (savedThemeColor) {
+      body.className = savedThemeColor;
+    } else {
+      if (
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
+        body.className = "theme-dark";
+      } else {
+        // by default
+        body.className = "theme-light";
+      }
+    }
+  </script>
   <!-- Header -->
   <header class="header">
     <div class="header-title">
       <h1>Enviro Plus Web</h1>
     </div>
 
-    <div class="header-settings">
+    <div class="container-menu-hamburger">
+      <button type="button" id="menu-hamburger" class="menu-hamburger" aria-label="Main menu">
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+          <path class="menu-main-hamburger menu-line1"
+            d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
+          <path class="menu-main-hamburger menu-line2" d="M 20,50 H 80" />
+          <path class="menu-main-hamburger menu-line3"
+            d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
+        </svg>
+      </button>
+    </div>
 
-      <div>
+    <div id="container-menu-settings" class="container-menu-settings">
+      <div class="container-info-time">
+        <span id="time"></span>
+      </div>
+
+      <div class="container-btn-timeRange">
         <span class="header-icon" title="Time range">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
             <circle cx="386" cy="210" r="20" />
@@ -38,9 +72,7 @@
             <circle cx="212" cy="210" r="20" />
           </svg>
         </span>
-        <label for="graph-sel" class="visually-hidden">
-          Time range
-        </label>
+        <label for="graph-sel" class="visually-hidden"> Time range </label>
         <select id="graph-sel">
           <option value="5min">5 minutes</option>
           <option value="day">1 day</option>
@@ -50,7 +82,7 @@
         </select>
       </div>
 
-      <div>
+      <div class="container-btn-fanGpio">
         <span class="header-icon" title="Fan power">
           <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"
             aria-hidden="true" focusable="false">
@@ -59,7 +91,7 @@
             <path
               d="M65 80a15.01 15.01 0 0 0 15-15 15.01 15.01 0 0 0-15-15 15.01 15.01 0 0 0-15 15 15.01 15.01 0 0 0 15 15zm0 0" />
             <use xlink:href="#A" x="-412" y="412" transform="matrix(1.5 0 0 1.5 -10.000007 -245.99999)" />
-            <g stroke="#000">
+            <g>
               <path
                 d="M458.665 4.145H53.335c-27.124 0-49.191 22.067-49.191 49.191v405.329c0 27.124 22.067 49.191 49.191 49.191h405.329c27.124 0 49.191-22.067 49.191-49.191V53.335c0-27.124-22.067-49.191-49.191-49.191zm29.514 454.52c0 16.275-13.239 29.514-29.514 29.514H53.335c-16.275 0-29.514-13.239-29.514-29.514V53.335c0-16.275 13.239-29.514 29.514-29.514h405.329c16.275 0 29.514 13.239 29.514 29.514zM367.772 174.711c0-50.424-41.025-91.45-91.45-91.45H256a10.161 10.161 0 0 0-10.161 10.161v84.734c-16.953-20.946-42.799-33.929-71.127-33.929-50.424 0-91.45 41.025-91.45 91.45V256c0 5.612 4.549 10.149 10.161 10.149h84.734c-20.946 16.957-33.929 42.812-33.929 71.14 0 50.424 41.025 91.45 91.45 91.45H256a10.161 10.161 0 0 0 10.161-10.161v-84.734c16.953 20.946 42.799 33.929 71.127 33.929 50.424 0 91.45-41.025 91.45-91.45V256a10.161 10.161 0 0 0-10.161-10.161h-84.734c20.946-16.953 33.929-42.799 33.929-71.127zm-91.45-71.127c39.22 0 71.127 31.908 71.127 71.127a71.08 71.08 0 0 1-43.189 65.428c-5.656-17.195-20.231-30.265-38.1-33.913V103.584zM257.933 286.42c-17.242 1.039-31.345-12.118-32.353-28.487-1.071-17.779 13.011-32.417 30.42-32.417 16.682 0 30.483 13.53 30.483 30.483 0 16.071-12.551 29.436-28.551 30.42zm-154.349-50.742c0-39.22 31.908-71.127 71.127-71.127a71.08 71.08 0 0 1 65.428 43.189c-17.195 5.656-30.265 20.231-33.913 38.1H103.584zm132.094 172.738c-39.22 0-71.127-31.908-71.127-71.127a71.08 71.08 0 0 1 43.189-65.428c5.656 17.195 20.231 30.265 38.1 33.913v102.643zm172.738-132.094c0 39.22-31.908 71.127-71.127 71.127a71.08 71.08 0 0 1-65.428-43.189c17.195-5.656 30.265-20.231 33.913-38.1h102.643zm0 0"
                 stroke-width="5.761" />
@@ -73,34 +105,131 @@
             </defs>
           </svg>
         </span>
-        <label for="fan" class="visually-hidden">
-          Fan power
-        </label>
-        <input id="fan" type="number" min="0" max="100" step="5" value="100" name="fan">
-      </div>
-      
-      <div>
-        <a href="https://gitlab.com/idotj/enviroplusweb" target="_blank" class="header-icon" rel="noopener noreferrer" title="Enviro Plus Web repo in Gitlab">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 236" preserveAspectRatio="xMidYMid"><path d="M128.075 236.075h0l47.104-144.97H80.97l47.104 144.97z" fill="#e24329"></path><path d="M128.075 236.074L80.97 91.104H14.956l113.12 144.97z" fill="#fc6d26"></path><path d="M14.956 91.104h0L.642 135.16a9.75 9.75 0 0 0 3.543 10.903l123.89 90.012-113.12-144.97z" fill="#fca326"></path><path d="M14.956 91.105H80.97L52.6 3.8c-1.46-4.493-7.815-4.492-9.275 0l-28.37 87.314z" fill="#e24329"></path><path d="M128.075 236.074l47.104-144.97h66.015l-113.12 144.97z" fill="#fc6d26"></path><path d="M241.194 91.104h0l14.314 44.055a9.75 9.75 0 0 1-3.543 10.903l-123.89 90.012 113.12-144.97z" fill="#fca326"></path><path d="M241.194 91.105H175.18L203.55 3.8c1.46-4.493 7.815-4.492 9.275 0l28.37 87.314z" fill="#e24329"></path></svg>
-        </a>
+        <label for="fan" class="visually-hidden"> Fan power </label>
+        <input id="fan" type="number" min="0" max="100" step="5" value="100" name="fan" />
       </div>
 
+      <div class="container-btn-theme">
+        <button type="button" id="theme-dark" title="Change to Dark theme">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="button-icon-svg" fill="currentColor">
+            <path
+              d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z" />
+          </svg>
+        </button>
+        <button type="button" id="theme-light" title="Change to Light theme">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="button-icon-svg" fill="currentColor">
+            <path
+              d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="container-btn-gitlab">
+        <a href="https://gitlab.com/idotj/enviroplusweb" target="_blank" class="header-icon" rel="noopener noreferrer"
+          title="Enviro Plus Web repo in Gitlab">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 236" preserveAspectRatio="xMidYMid">
+            <path d="M128.075 236.075h0l47.104-144.97H80.97l47.104 144.97z" fill="#e24329"></path>
+            <path d="M128.075 236.074L80.97 91.104H14.956l113.12 144.97z" fill="#fc6d26"></path>
+            <path d="M14.956 91.104h0L.642 135.16a9.75 9.75 0 0 0 3.543 10.903l123.89 90.012-113.12-144.97z"
+              fill="#fca326"></path>
+            <path d="M14.956 91.105H80.97L52.6 3.8c-1.46-4.493-7.815-4.492-9.275 0l-28.37 87.314z" fill="#e24329">
+            </path>
+            <path d="M128.075 236.074l47.104-144.97h66.015l-113.12 144.97z" fill="#fc6d26"></path>
+            <path d="M241.194 91.104h0l14.314 44.055a9.75 9.75 0 0 1-3.543 10.903l-123.89 90.012 113.12-144.97z"
+              fill="#fca326"></path>
+            <path d="M241.194 91.105H175.18L203.55 3.8c1.46-4.493 7.815-4.492 9.275 0l28.37 87.314z" fill="#e24329">
+            </path>
+          </svg>
+        </a>
+      </div>
     </div>
+
   </header>
 
   <!-- Main content -->
   <main class="main">
     <div class="container-readings">
-      <div id="readings" class="readings">Connecting...</div>
-      <div class="container-scale-factors">
-        <details>
-          <summary>Scale factors</summary>
-          <table class="scale-factors">
-            <tbody id="scale-factors-tbody">
-            </tbody>
-          </table>
-        </details>
-      </div>
+      <table>
+        <tbody>
+          <tr>
+            <td><span class="color-red">▣ Temperature:</span></td>
+            <td><span id="temp"></span>&deg;C</td>
+          </tr>
+          <tr>
+            <td><span class="color-blue">▣ Humidity:</span></td>
+            <td><span id="humi"></span>%</td>
+          </tr>
+          <tr>
+            <td><span class="color-green">▣ Pressure:</span></td>
+            <td><span id="pres"></span>&nbsp;mBar</td>
+          </tr>
+          <tr>
+            <td><span class="color-yellow">▣ Light:</span></td>
+            <td><span id="lux"></span>&nbsp;lux</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <details class="readings-gas">
+        <summary>Gas</summary>
+        <table>
+          <tbody>
+            <tr>
+              <td><span class="color-violet">▣ Oxidising:</span></td>
+              <td><span id="oxi"></span>&nbsp;k&Omega;</td>
+            </tr>
+            <tr>
+              <td><span class="color-orange">▣ Reducing:</span></td>
+              <td><span id="red"></span>&nbsp;k&Omega;</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="color-turquoise">▣ NH<sub>3</sub>:</span>
+              </td>
+              <td><span id="nh3"></span>&nbsp;k&Omega;</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details class="readings-pm">
+        <summary>Particulate matter</summary>
+        <table>
+          <tbody>
+            <tr>
+              <td><span class="color-pmColor03">▣ &gt;0.3um:</span></td>
+              <td><span id="pm03"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor05">▣ &gt;0.5um:</span></td>
+              <td><span id="pm05"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor10">▣ &gt;1.0um:</span></td>
+              <td><span id="pm10"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor25">▣ &gt;2.5um:</span></td>
+              <td><span id="pm25"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor50">▣ &gt;5.0um:</span></td>
+              <td><span id="pm50"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor100">▣ &gt;10.0um:</span></td>
+              <td><span id="pm100"></span>&nbsp;/&nbsp;0.1l</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
+      <details>
+        <summary>Scale factors</summary>
+        <table class="scale-factors">
+          <tbody id="scale-factors-tbody"></tbody>
+        </table>
+      </details>
     </div>
 
     <div id="container-graph" class="container-graph">
@@ -109,187 +238,7 @@
   </main>
 
   <!-- Javascript -->
-  <script>
-    setInterval(function () {
-      // Call a function repetitively with 1 second interval
-      getData();
-      getGraph();
-    }, 900); //~1s update rate
-
-    var frequencies = {
-      '5min': { major: 300, minor: 60, poll: 1 },
-      'day': { major: 3 * 3600, minor: 3600, poll: 60 },
-      'week': { major: 24 * 3600, minor: 6 * 3600, poll: 600 },
-      'month': { major: 7 * 24 * 3600, minor: 24 * 3600, poll: 1440 },
-      'year': { major: 31 * 24 * 3600, minor: 7 * 24 * 3600, poll: 17280 }
-    };
-
-    var particle_sensor = false;
-    var gas_sensor = false;
-
-    function getData() {
-      var xhttp = new XMLHttpRequest();
-      var fan = document.getElementById("fan").value;
-      xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("readings").innerHTML = this.responseText;
-          particle_sensor = this.responseText.search("10.0um") > 0;
-          gas_sensor = this.responseText.search("Oxidising") > 0;
-        }
-      };
-      xhttp.open("GET", "readings?fan=" + fan, true);
-      xhttp.send();
-    }
-
-    var last_frequency = "";
-    var last_graph = 0;
-    function getGraph(param) {
-      var frequency = document.getElementById("graph-sel").value;
-      var t = Date.now() / 1000;
-      if (frequency != last_frequency || t - last_graph >= frequencies[frequency].poll || param == 'resized') {
-        last_frequency = frequency;
-        last_graph = t;
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-          if (this.readyState == 4 && this.status == 200) {
-            graph(JSON.parse(this.responseText));
-          }
-        };
-        xhttp.open("GET", "graph?time=" + frequency, true);
-        xhttp.send();
-      }
-    }
-
-    var items_ngp = [
-      { name: "temp", colour: "#ff595e", min: 0, max: 50 },
-      { name: "humi", colour: "#006caf", min: 0, max: 100 },
-      { name: "pres", colour: "#588f00", min: 950, max: 1050 },
-      { name: "lux", colour: "#f5b60f", min: 0, max: 25000 },
-    ]
-
-    var items_g = [
-      { name: "oxi", colour: "#6a4c93", min: 0, max: 400 },
-      { name: "red", colour: "#ce7100", min: 0, max: 1000 },
-      { name: "nh3", colour: "#6ca88a", min: 0, max: 600 },
-    ]
-
-    var items_p = [
-      { name: "pm03", colour: "#575757", min: 0, max: 20000 },
-      { name: "pm05", colour: "#696969", min: 0, max: 10000 },
-      { name: "pm10", colour: "#7c7c7c", min: 0, max: 2000 },
-      { name: "pm25", colour: "#909090", min: 0, max: 500 },
-      { name: "pm50", colour: "#a4a4a4", min: 0, max: 200 },
-      { name: "pm100", colour: "#b0b0b0", min: 0, max: 100 },
-    ];
-
-    var firstLayoutRender = true;
-    var containerCanvas;
-    var canvas;
-    var ctx;
-    var data;
-    var yScaleSteps = 10;
-    var yLabelHeight = 10;
-    var xLabelHeight = 15;
-    var xScale;
-    var yScale;
-    var yLabelWidth = 25;
-    function graph(d) {
-      data = d;
-      containerCanvas = document.getElementById("container-graph");
-      canvas = document.getElementById("canvas-graph");
-      if (firstLayoutRender) {
-        canvas.height = containerCanvas.offsetHeight;
-        canvas.width = containerCanvas.offsetWidth;
-        firstLayoutRender = false;
-      }
-
-      ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#0099ff"
-      ctx.font = "20 pt Verdana"
-
-      yScale = (canvas.height - yLabelHeight - xLabelHeight);
-      xScale = (canvas.width - yLabelWidth) / (data.length - 1);
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Print X axis vertical time lines
-      var frequency = document.getElementById("graph-sel").value;
-      var major = frequencies[frequency].major;
-      var minor = frequencies[frequency].minor;
-      var show_date = major >= 24 * 3600;
-      var months = {
-        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-      }
-      ctx.textAlign = 'center';
-      for (var i = 0; i < data.length; i++) {
-        var fields = data[i]['time'].match(/\S+/g); // split is broken!
-        var t = fields[3].split(':');
-        var date = months[fields[1]] * 31 + parseInt(fields[2]) - 1;
-        var time = date * 24 * 3600 + parseInt(t[0]) * 3600 + parseInt(t[1]) * 60 + parseInt(t[2]);
-        if (time % minor == 0) {
-          var is_major = (time % major) == 0;
-          var x = i * xScale + yLabelWidth;
-          if (is_major)
-            ctx.fillText(show_date ? fields[0] + ' ' + fields[1] + ' ' + fields[2]
-              : fields[3].slice(0, 5), x, canvas.height);
-          ctx.beginPath();
-          ctx.strokeStyle = is_major ? "#b6b6b6" : "#dcdcdc"; // colour of grid lines
-          ctx.setLineDash([5, 3]);
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height - xLabelHeight);
-          ctx.stroke();
-        }
-      }
-
-      // Print Y axis labels and draw horizontal grid lines
-      ctx.beginPath();
-      ctx.strokeStyle = "#dcdcdc"; // colour of grid lines
-      ctx.textAlign = 'left';
-      for (var i = 0; i <= yScaleSteps; i++) {
-        var y = yScale * (yScaleSteps - i) / yScaleSteps + yLabelHeight - 1;
-        ctx.fillText(i / yScaleSteps, yLabelHeight, y);
-        ctx.moveTo(yLabelWidth, y)
-        ctx.lineTo(canvas.width, y)
-      }
-      ctx.stroke();
-
-      // Plot each item
-      var scaleFactors = "";
-      var items = particle_sensor ? items_ngp.concat(items_g).concat(items_p) :
-        gas_sensor ? items_ngp.concat(items_g) : items_ngp;
-      for (var item of items) {
-        ctx.strokeStyle = item.colour;
-        plotData(item.name, item.min, item.max);
-        scaleFactors += '<tr><td>' + item.name + '</td><td>/' + (item.max - item.min) + '</td></tr>';
-      }
-
-      // Update the legend
-      document.getElementById("scale-factors-tbody").innerHTML = scaleFactors;
-    }
-
-    function scaley(y, min, max) {
-      return (y - min) * yScale / (max - min);
-    }
-
-    function plotData(dataSet, min, max) {
-      ctx.beginPath();
-      ctx.setLineDash([]);
-      y0 = canvas.height - xLabelHeight;
-      ctx.moveTo(yLabelWidth, y0 - scaley(data[0][dataSet], min, max));
-      for (var i = 1; i < data.length; i++) {
-        ctx.lineTo(yLabelWidth + i * xScale, y0 - scaley(data[i][dataSet], min, max));
-      }
-      ctx.stroke();
-    }
-
-    // Update the graph layout (width/height) if window resize
-    window.addEventListener("resize", function(){
-      firstLayoutRender = true;
-      getGraph('resized');
-    });
-
-  </script>
-
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 
 </html>
