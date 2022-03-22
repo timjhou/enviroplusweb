@@ -158,7 +158,7 @@ def read_data(time):
 
     pressure = bme280.get_pressure()
     lux = ltr559.get_lux()
-    
+
     if gas_sensor:
         gases = gas.read_all()
         oxi = round(gases.oxidising / 1000, 1)
@@ -166,7 +166,7 @@ def read_data(time):
         nh3 = round(gases.nh3 / 1000)
     else:
         oxi = red = nh3 = 0
-        
+
     if particulate_sensor:
         while True:
             try:
@@ -178,7 +178,7 @@ def read_data(time):
                     raise e
                 pms5003.reset()
                 sleep(30)
-                
+
         pm100 = particles.pm_per_1l_air(10.0)
         pm50  = particles.pm_per_1l_air(5.0) - pm100
         pm25  = particles.pm_per_1l_air(2.5) - pm100 - pm50
@@ -187,7 +187,7 @@ def read_data(time):
         pm3   = particles.pm_per_1l_air(0.3) - pm100 - pm50 - pm25 - pm10 - pm5
     else:
         pm100 = pm50 = pm25 = pm10 = pm5 = pm3 = 0
-        
+
     record = {
         'time' : asctime(localtime(time)),
         'temp' : round(temperature,1),
@@ -282,7 +282,6 @@ def readings():
     if fan_gpio:
         arg = request.args["fan"]
         pwm.ChangeDutyCycle(int(arg))
-    # return render_template('readings.html' if particulate_sensor else 'readings_np.html' if gas_sensor else 'readings_ng.html', **record) 
     return record
 
 def compress_data(ndays, nsamples):
