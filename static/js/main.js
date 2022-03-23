@@ -102,7 +102,7 @@ var firstLayoutRender = true;
 var containerCanvas;
 var canvas;
 var ctx;
-var data;
+var dataGraph;
 var dataReadings;
 const yScaleSteps = 10;
 const yLabelHeight = 10;
@@ -187,7 +187,7 @@ function getGraph(param) {
 
 // Draw the background grid and labels
 function graph(d) {
-  data = d;
+  dataGraph = d;
   containerCanvas = document.getElementById("container-graph");
   canvas = document.getElementById("canvas-graph");
   if (firstLayoutRender) {
@@ -204,7 +204,7 @@ function graph(d) {
   ctx.font = "20 pt Verdana";
 
   yScale = canvas.height - yLabelHeight - xLabelHeight;
-  xScale = (canvas.width - yLabelWidth) / (data.length - 1);
+  xScale = (canvas.width - yLabelWidth) / (dataGraph.length - 1);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // Print X axis vertical time lines
@@ -227,8 +227,8 @@ function graph(d) {
     Dec: 11,
   };
   ctx.textAlign = "center";
-  for (var i = 0; i < data.length; i++) {
-    var fields = data[i]["time"].match(/\S+/g); // split is broken!
+  for (var i = 0; i < dataGraph.length; i++) {
+    var fields = dataGraph[i]["time"].match(/\S+/g); // split is broken!
     var t = fields[3].split(":");
     var date = months[fields[1]] * 31 + parseInt(fields[2]) - 1;
     var time =
@@ -285,8 +285,8 @@ function graph(d) {
   var items = particulate_sensor
     ? items_ngp.concat(items_g).concat(items_p)
     : gas_sensor
-    ? items_ngp.concat(items_g)
-    : items_ngp;
+      ? items_ngp.concat(items_g)
+      : items_ngp;
   for (var item of items) {
     ctx.strokeStyle = item.colour;
     plotData(item.name, item.min, item.max);
@@ -307,11 +307,11 @@ function plotData(dataSet, min, max) {
   ctx.beginPath();
   ctx.setLineDash([]);
   y0 = canvas.height - xLabelHeight;
-  ctx.moveTo(yLabelWidth, y0 - scaley(data[0][dataSet], min, max));
-  for (var i = 1; i < data.length; i++) {
+  ctx.moveTo(yLabelWidth, y0 - scaley(dataGraph[0][dataSet], min, max));
+  for (var i = 1; i < dataGraph.length; i++) {
     ctx.lineTo(
       yLabelWidth + i * xScale,
-      y0 - scaley(data[i][dataSet], min, max)
+      y0 - scaley(dataGraph[i][dataSet], min, max)
     );
   }
   ctx.stroke();
@@ -323,10 +323,15 @@ function scaley(y, min, max) {
 }
 
 // Update the graph layout (width/height) if window resize
-window.addEventListener("resize", function () {
+window.addEventListener('resize', function () {
+  var resizeId;
+  clearTimeout(resizeId);
+  resizeId = setTimeout(doneResizing, 500);
+});
+function doneResizing() {
   firstLayoutRender = true;
   getGraph(true);
-});
+}
 
 // Control main menu (mobile)
 const menuMainBtn = document.getElementById("menu-hamburger");
