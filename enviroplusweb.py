@@ -12,9 +12,9 @@
 #
 
 # If you prefer to keep the Enviro LCD screen off, change the next value to False
-lcd_screen = True
+lcd_screen = False
 # If you don't have a fan plugged on GPIO, change the next value to False
-fan_gpio = True
+fan_gpio = False
 # If you have an Enviro board without gas sensor, change the next value to False
 gas_sensor = True
 # If you don't have a particle sensor PMS5003 attached, change the next value to False
@@ -100,13 +100,13 @@ if lcd_screen:
             "%",
             "mBar",
             "Lux"]
-            
+
     if gas_sensor:
         units += [
             "kΩ",
             "kΩ",
             "kΩ"]
-            
+
     if particulate_sensor:
         units += [
             "/0.ll",
@@ -132,7 +132,6 @@ if lcd_screen:
             rgb = (255, 0, 255) if data_value > last_value * tol  else (0, 255, 255) if data_value < last_value / tol else (0, 255, 0)
             draw.text((x, y), message, font = smallfont, fill = rgb)
         st7735.display(img)
-
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -330,7 +329,7 @@ if __name__ == '__main__':
         days.append(read_day('data/' + f))
     background_thread.start()
     try:
-        app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
+        app.run(debug = False, host = '0.0.0.0', port = 81, use_reloader = False)
     except Exception as e:
         print(e)
         pass

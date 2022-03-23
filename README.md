@@ -3,7 +3,10 @@
 Web interface for [Enviro](https://shop.pimoroni.com/products/enviro?variant=31155658489939) and [Enviro+](https://shop.pimoroni.com/products/enviro?variant=31155658457171) sensor board plugged into a Raspberry Pi.  
 This simple Flask application serves a web page with the current sensor readings and a graph over a specified time period.
 
-![Screenshot](screenshot.jpg)
+![Screenshot](screenshot-lightTheme.jpg)
+
+![Screenshot](screenshot-darkTheme.jpg)
+
 
 Forked from <https://github.com/nophead/EnviroPlusWeb>
 
