@@ -12,9 +12,9 @@
 #
 
 # If you prefer to keep the Enviro LCD screen off, change the next value to False
-lcd_screen = False
+lcd_screen = True
 # If you don't have a fan plugged on GPIO, change the next value to False
-fan_gpio = False
+fan_gpio = True
 # If you have an Enviro board without gas sensor, change the next value to False
 gas_sensor = True
 # If you don't have a particle sensor PMS5003 attached, change the next value to False
@@ -329,7 +329,7 @@ if __name__ == '__main__':
         days.append(read_day('data/' + f))
     background_thread.start()
     try:
-        app.run(debug = False, host = '0.0.0.0', port = 81, use_reloader = False)
+        app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
     except Exception as e:
         print(e)
         pass
