@@ -42,8 +42,14 @@ const items_ngp = [
 ];
 const items_g = [
   {
-    name: "oxi",
+    name: "nh3",
     colour: style.getPropertyValue("--color-violet"),
+    min: 0,
+    max: 600,
+  },
+  {
+    name: "oxi",
+    colour: style.getPropertyValue("--color-turquoise"),
     min: 0,
     max: 400,
   },
@@ -52,44 +58,20 @@ const items_g = [
     colour: style.getPropertyValue("--color-orange"),
     min: 0,
     max: 1000,
-  },
-  {
-    name: "nh3",
-    colour: style.getPropertyValue("--color-turquoise"),
-    min: 0,
-    max: 600,
-  },
+  }
 ];
 const items_p = [
-  {
-    name: "pm03",
-    colour: style.getPropertyValue("--color-dust03"),
-    min: 0,
-    max: 20000,
-  },
-  {
-    name: "pm05",
-    colour: style.getPropertyValue("--color-dust05"),
-    min: 0,
-    max: 10000,
-  },
   {
     name: "pm10",
     colour: style.getPropertyValue("--color-dust10"),
     min: 0,
-    max: 2000,
+    max: 100,
   },
   {
     name: "pm25",
     colour: style.getPropertyValue("--color-dust25"),
     min: 0,
-    max: 500,
-  },
-  {
-    name: "pm50",
-    colour: style.getPropertyValue("--color-dust50"),
-    min: 0,
-    max: 200,
+    max: 100,
   },
   {
     name: "pm100",
@@ -128,7 +110,7 @@ function getData() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      // console.log('getData: ', JSON.parse(this.responseText));
+      // console.log('Readings data: ', JSON.parse(this.responseText));
       listReadings(JSON.parse(this.responseText));
     }
   };
@@ -162,6 +144,15 @@ function listReadings(d) {
   }
 }
 
+// Load the scale factors in the readings tables
+function listScaleFactors(item) {
+  var itemIdKey = document.getElementById(item.name + '-scale');
+  var itemValue = (item.max - item.min);
+  if (typeof itemIdKey != "undefined" && itemIdKey != null) {
+    itemIdKey.innerHTML = '/' + itemValue;
+  }
+}
+
 // Request to get the graph data
 function getGraph(param) {
   var frequency = document.getElementById("graph-sel").value;
@@ -176,7 +167,7 @@ function getGraph(param) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
-        // console.log('getGraph', JSON.parse(this.responseText))
+        // console.log('Graph data: ', JSON.parse(this.responseText))
         graph(JSON.parse(this.responseText));
       }
     };
@@ -199,7 +190,7 @@ function graph(d) {
   ctx = canvas.getContext("2d");
   // Color of the graph labels
   ctx.fillStyle = hasThemeLight
-    ? style.getPropertyValue("--color-dust10")
+    ? style.getPropertyValue("--color-gray")
     : style.getPropertyValue("--color-gray-dark");
   ctx.font = "20 pt Verdana";
 
@@ -251,8 +242,8 @@ function graph(d) {
       // Color of vertical grid lines
       if (hasThemeLight) {
         ctx.strokeStyle = is_major
-          ? style.getPropertyValue("--color-dust03")
-          : style.getPropertyValue("--color-gray");
+          ? style.getPropertyValue("--color-gray")
+          : style.getPropertyValue("--color-gray-light");
       } else {
         ctx.strokeStyle = is_major
           ? style.getPropertyValue("--color-gray-dark")
@@ -269,7 +260,7 @@ function graph(d) {
   ctx.beginPath();
   // Color of horizontal grid lines
   ctx.strokeStyle = hasThemeLight
-    ? style.getPropertyValue("--color-gray")
+    ? style.getPropertyValue("--color-gray-light")
     : style.getPropertyValue("--color-gray-darker");
   ctx.textAlign = "left";
   for (var i = 0; i <= yScaleSteps; i++) {
@@ -281,7 +272,6 @@ function graph(d) {
   ctx.stroke();
 
   // Plot each item
-  var scaleFactors = "";
   var items = particulate_sensor
     ? items_ngp.concat(items_g).concat(items_p)
     : gas_sensor
@@ -290,16 +280,9 @@ function graph(d) {
   for (var item of items) {
     ctx.strokeStyle = item.colour;
     plotData(item.name, item.min, item.max);
-    scaleFactors +=
-      "<tr><td>" +
-      item.name +
-      "</td><td>/" +
-      (item.max - item.min) +
-      "</td></tr>";
+    listScaleFactors(item);
   }
 
-  // Update the legend (Scale factors)
-  document.getElementById("scale-factors-tbody").innerHTML = scaleFactors;
 }
 
 // Draw each reading value on the grid

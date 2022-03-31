@@ -152,19 +152,19 @@
       <table>
         <tbody>
           <tr>
-            <td><span class="color-red">▣ Temperature:</span></td>
+            <td><span class="color-red">▣ Temperature</span></td>
             <td><span id="temp">-</span>&deg;C</td>
           </tr>
           <tr>
-            <td><span class="color-blue">▣ Humidity:</span></td>
+            <td><span class="color-blue">▣ Humidity</span></td>
             <td><span id="humi">-</span>%</td>
           </tr>
           <tr>
-            <td><span class="color-green">▣ Pressure:</span></td>
-            <td><span id="pres">-</span>&nbsp;mBar</td>
+            <td><span class="color-green">▣ Pressure</span></td>
+            <td><span id="pres">-</span>&nbsp;hPa</td>
           </tr>
           <tr>
-            <td><span class="color-yellow">▣ Light:</span></td>
+            <td><span class="color-yellow">▣ Light</span></td>
             <td><span id="lux">-</span>&nbsp;lux</td>
           </tr>
         </tbody>
@@ -175,18 +175,18 @@
         <table>
           <tbody>
             <tr>
-              <td><span class="color-violet">▣ Oxidising:</span></td>
-              <td><span id="oxi">-</span>&nbsp;k&Omega;</td>
-            </tr>
-            <tr>
-              <td><span class="color-orange">▣ Reducing:</span></td>
-              <td><span id="red">-</span>&nbsp;k&Omega;</td>
-            </tr>
-            <tr>
               <td>
-                <span class="color-turquoise">▣ NH<sub>3</sub>:</span>
+                <span class="color-violet">▣ NH<sub>3</sub></span>
               </td>
-              <td><span id="nh3">-</span>&nbsp;k&Omega;</td>
+              <td><span id="nh3">-</span>&nbsp;kΩ</td>
+            </tr>
+            <tr>
+              <td><span class="color-orange">▣ Reducing</span></td>
+              <td><span id="red">-</span>&nbsp;kΩ</td>
+            </tr>
+            <tr>
+              <td><span class="color-turquoise">▣ Oxidising</span></td>
+              <td><span id="oxi">-</span>&nbsp;kΩ</td>
             </tr>
           </tbody>
         </table>
@@ -197,28 +197,16 @@
         <table>
           <tbody>
             <tr>
-              <td><span class="color-pmColor03">▣ &gt;0.3um:</span></td>
-              <td><span id="pm03">-</span>&nbsp;/&nbsp;0.1l</td>
+              <td><span class="color-pmColor100">▣ PM<sub>10.0</sub></span></td>
+              <td><span id="pm100">-</span>μg/m<sup>3</sup></td>
             </tr>
             <tr>
-              <td><span class="color-pmColor05">▣ &gt;0.5um:</span></td>
-              <td><span id="pm05">-</span>&nbsp;/&nbsp;0.1l</td>
+              <td><span class="color-pmColor25">▣ PM<sub>2.5</sub></span></td>
+              <td><span id="pm25">-</span>μg/m<sup>3</sup></td>
             </tr>
             <tr>
-              <td><span class="color-pmColor10">▣ &gt;1.0um:</span></td>
-              <td><span id="pm10">-</span>&nbsp;/&nbsp;0.1l</td>
-            </tr>
-            <tr>
-              <td><span class="color-pmColor25">▣ &gt;2.5um:</span></td>
-              <td><span id="pm25">-</span>&nbsp;/&nbsp;0.1l</td>
-            </tr>
-            <tr>
-              <td><span class="color-pmColor50">▣ &gt;5.0um:</span></td>
-              <td><span id="pm50">-</span>&nbsp;/&nbsp;0.1l</td>
-            </tr>
-            <tr>
-              <td><span class="color-pmColor100">▣ &gt;10.0um:</span></td>
-              <td><span id="pm100">-</span>&nbsp;/&nbsp;0.1l</td>
+              <td><span class="color-pmColor10">▣ PM<sub>1.0</sub></span></td>
+              <td><span id="pm10">-</span>μg/m<sup>3</sup></td>
             </tr>
           </tbody>
         </table>
@@ -227,7 +215,54 @@
       <details>
         <summary>Scale factors</summary>
         <table class="scale-factors">
-          <tbody id="scale-factors-tbody"></tbody>
+          <tbody id="scale-factors-tbody">
+            <tr>
+              <td><span class="color-red">Temperature</span></td>
+              <td><span id="temp-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-blue">Humidity</span></td>
+              <td><span id="humi-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-green">Pressure</span></td>
+              <td><span id="pres-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-yellow">Light</span></td>
+              <td><span id="lux-scale">-</span></td>
+            </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr>
+              <td>
+                <span class="color-violet">NH<sub>3</sub></span>
+              </td>
+              <td><span id="nh3-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-orange">Reducing</span></td>
+              <td><span id="red-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-turquoise">Oxidising</span></td>
+              <td><span id="oxi-scale">-</span></td>
+            </tr>
+            <tr></tr>
+            <tr></tr>
+            <tr>
+              <td><span class="color-pmColor100">PM<sub>10.0</sub></span></td>
+              <td><span id="pm100-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor25">PM<sub>2.5</sub></span></td>
+              <td><span id="pm25-scale">-</span></td>
+            </tr>
+            <tr>
+              <td><span class="color-pmColor10">PM<sub>1.0</sub></span></td>
+              <td><span id="pm10-scale">-</span></td>
+            </tr>
+          </tbody>
         </table>
       </details>
     </div>

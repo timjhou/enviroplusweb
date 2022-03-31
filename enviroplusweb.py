@@ -12,14 +12,17 @@
 #
 
 # If you prefer to keep the Enviro LCD screen off, change the next value to False
-lcd_screen = True
+lcd_screen = False
 # If you don't have a fan plugged on GPIO, change the next value to False
-fan_gpio = True
+fan_gpio = False
+# Temperature and humidity compensation (edit values 'factor_temp' and 'factor_humi' to adjust them)
+temp_humi_compensation = True
 # If you have an Enviro board without gas sensor, change the next value to False
 gas_sensor = True
 # If you don't have a particle sensor PMS5003 attached, change the next value to False
 particulate_sensor = True
 assert gas_sensor or not particulate_sensor # Can't have particle sensor without gas sensor
+import math
 from flask import Flask, render_template, url_for, request
 import logging
 from bme280 import BME280
@@ -48,9 +51,10 @@ except ImportError:
     from smbus import SMBus
 
 bus = SMBus(1)
-bme280 = BME280(i2c_dev=bus) # BME280 temperature, humidity and pressure sensor
-
-pms5003 = PMS5003() # PMS5003 particulate sensor
+# BME280 temperature, humidity and pressure sensor
+bme280 = BME280(i2c_dev=bus)
+# PMS5003 particulate sensor
+pms5003 = PMS5003()
 
 # Config the fan plugged to RPi
 if fan_gpio:
@@ -59,16 +63,17 @@ if fan_gpio:
     pwm = IO.PWM(4,1000) # PWM frequency
     pwm.start(100)       # Duty cycle
 
-# Get the temperature of the CPU
-def get_cpu_temperature():
-    with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
-        temp = f.read()
-        temp = int(temp) / 1000.0
-    return temp
+if temp_humi_compensation:
+    # Get the temperature of the CPU
+    def get_cpu_temperature():
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as f:
+            temp = f.read()
+            temp = int(temp) / 1000.0
+        return temp
 
-# Tuning factor for compensation the temperature and humidity
-factor_temp = 3.10
-factor_humi = 2
+    # Tuning factor for compensate the temperature and humidity
+    factor_temp = 3.10
+    factor_humi = 1.26
 
 # Create ST7735 LCD display class
 if lcd_screen:
@@ -98,7 +103,7 @@ if lcd_screen:
 
     units = ["°C",
             "%",
-            "mBar",
+            "hPa",
             "Lux"]
 
     if gas_sensor:
@@ -109,9 +114,9 @@ if lcd_screen:
 
     if particulate_sensor:
         units += [
-            "/0.ll",
-            "/0.1l",
-            "/0.1l"]
+            "μg/m3",
+            "μg/m3",
+            "μg/m3"]
 
     # Displays all the text on the 0.96" LCD
     def display_everything():
@@ -141,10 +146,7 @@ run_flag = True
 
 def read_data(time):
 
-    if fan_gpio:
-        temperature = bme280.get_temperature()
-        humidity = bme280.get_humidity()
-    else:
+    if temp_humi_compensation:
         cpu_temps = [get_cpu_temperature()] * 5  
         cpu_temp = get_cpu_temperature()
         # Smooth out with some averaging to decrease jitter
@@ -153,7 +155,10 @@ def read_data(time):
         raw_temp = bme280.get_temperature()
         temperature = raw_temp - ((avg_cpu_temp - raw_temp) / factor_temp)
         raw_humi = bme280.get_humidity()
-        humidity = raw_humi + ((avg_cpu_temp - raw_temp) / factor_humi)
+        humidity = raw_humi * factor_humi
+    else:
+        temperature = bme280.get_temperature()
+        humidity = bme280.get_humidity()
 
     pressure = bme280.get_pressure()
     lux = ltr559.get_lux()
@@ -177,15 +182,11 @@ def read_data(time):
                     raise e
                 pms5003.reset()
                 sleep(30)
-
-        pm100 = particles.pm_per_1l_air(10.0)
-        pm50  = particles.pm_per_1l_air(5.0) - pm100
-        pm25  = particles.pm_per_1l_air(2.5) - pm100 - pm50
-        pm10  = particles.pm_per_1l_air(1.0) - pm100 - pm50 - pm25
-        pm5   = particles.pm_per_1l_air(0.5) - pm100 - pm50 - pm25 - pm10
-        pm3   = particles.pm_per_1l_air(0.3) - pm100 - pm50 - pm25 - pm10 - pm5
+        pm100 = particles.pm_ug_per_m3(10)
+        pm25  = particles.pm_ug_per_m3(2.5)
+        pm10  = particles.pm_ug_per_m3(1.0)
     else:
-        pm100 = pm50 = pm25 = pm10 = pm5 = pm3 = 0
+        pm100 = pm25 = pm10 = 0
 
     record = {
         'time' : asctime(localtime(time)),
@@ -196,16 +197,14 @@ def read_data(time):
         'oxi'  : oxi,
         'red'  : red,
         'nh3'  : nh3,
-        'pm03' : pm3,
-        'pm05' : pm5,
         'pm10' : pm10,
         'pm25' : pm25,
-        'pm50' : pm50,
         'pm100': pm100,
     }
     return record
 
-record = read_data(time()) # Throw away the first readings as not accurate
+# Throw away the first readings as not accurate
+record = read_data(time())
 data = []
 days = []
 
@@ -230,14 +229,17 @@ def record_time(r):
     t = r['time'].split()[3].split(':')
     return int(t[0]) * 60 + int(t[1])
 
-samples = 300 # Number of 1 second samples average per file record
+# Number of 1 second samples average per file record
+samples = 300
 samples_per_day = 24 * 3600 // samples
 
 def add_record(day, record):
-    if record_time(record) > 0:  # If not the first record of the day
+    # If not the first record of the day
+    if record_time(record) > 0:
         while len(day) == 0 or record_time(day[-1]) < record_time(record) - samples // 60: # Is there a gap
             if len(day):
-                filler = dict(day[-1]) # Duplicate the last record to forward fill
+                # Duplicate the last record to forward fill
+                filler = dict(day[-1])
                 t = record_time(filler) + samples // 60
             else:
                 filler = dict(record) # Need to back fill
@@ -255,8 +257,10 @@ def background():
     while run_flag:
         t = int(floor(time()))
         record = read_data(t)
-        data = data[-(samples - 1):] + [record] # Keep five minutes
-        if t % samples == samples - 1 and len(data) == samples: # At the end of a 5 minute period?
+        # Keep five minutes
+        data = data[-(samples - 1):] + [record]
+        # At the end of a 5 minute period?
+        if t % samples == samples - 1 and len(data) == samples:
             totals = sum_data(data)
             fname = filename(t - (samples - 1))
             with open(fname, "a+") as f:
@@ -265,7 +269,8 @@ def background():
             if not days or (last_file and last_file != fname):
                 days.append([])
             last_file = fname
-            add_record(days[-1], totals)        # Add to today, filling any gap from last reading if been stopped
+            # Add to today, filling any gap from last reading if been stopped
+            add_record(days[-1], totals)
         if lcd_screen and days:
             display_everything()
         sleep(max(t + 1 - time(), 0.1))
@@ -322,14 +327,14 @@ def read_day(fname):
     return day
 
 if __name__ == '__main__':
-    if not os.path.isdir('data'):
-        os.makedirs('data')
-    files =  sorted(os.listdir('data'))
+    if not os.path.isdir('enviro-data'):
+        os.makedirs('enviro-data')
+    files =  sorted(os.listdir('enviro-data'))
     for f in files:
-        days.append(read_day('data/' + f))
+        days.append(read_day('enviro-data/' + f))
     background_thread.start()
     try:
-        app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
+        app.run(debug = False, host = '0.0.0.0', port = 81, use_reloader = False)
     except Exception as e:
         print(e)
         pass
