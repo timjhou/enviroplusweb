@@ -93,7 +93,7 @@ Maybe you want to run Enviro Plus Web at boot, then just type in the terminal:
 crontab -e
 ```
 
-Add a new entry at the very bottom with `@reboot` to specify that you want to run the command at boot, followed by the path where you clone the project and the command. Here you have an example:
+Add a new entry at the very bottom with `@reboot` to specify that you want to run the command at boot, followed by the path where you clone the project. Here you have an example:
 
 ```console
 @reboot sudo python3 /home/EnviroPlusWeb/enviroplusweb.py &
@@ -104,7 +104,7 @@ Add a new entry at the very bottom with `@reboot` to specify that you want to ru
 ### Where are my data readings?
 
 Depends on where you run `enviroplusweb.py`. By default your data will be stored in the same place where you have the application, in a JSON format inside a folder called `/enviro-data`.  
-But if you run the app at bootup (for example, using the _crontab_) then your folder `/enviro-data` will be at /home/pi (if your default user is 'pi').
+But if you run the app at bootup (for example, using the _crontab_) then your folder `/enviro-data` will be at `/home/pi` (if your default user is 'pi').
 
 ### How can I get my Raspberry Pi IP?
 
@@ -118,7 +118,7 @@ You can change the port to avoind any conflict with other applications. In that 
 app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
 ```
 
-Just change the `port = 80` value for another number (for example 81) and now you can access to your EnviroPlusWeb typing the ip address followed by :81
+Just change the `port = 80` value for another number (for example `81`) and now you can access to your EnviroPlusWeb typing the ip address followed by :81
 
 ## 🚀 Improve me
 
