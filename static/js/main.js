@@ -290,7 +290,8 @@ function plotData(dataSet, min, max) {
   ctx.beginPath();
   ctx.setLineDash([]);
   y0 = canvas.height - xLabelHeight;
-  if(dataGraph[0] !== 'undefined'){
+  // Avoid undefined error when dataGraph is empty
+  if(typeof dataGraph[0] !== 'undefined'){
     ctx.moveTo(yLabelWidth, y0 - scaley(dataGraph[0][dataSet], min, max));
   }
   for (var i = 1; i < dataGraph.length; i++) {
