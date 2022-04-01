@@ -209,7 +209,7 @@ data = []
 days = []
 
 def filename(t):
-    return strftime("data/%Y_%j", localtime(t))
+    return strftime("enviro-data/%Y_%j", localtime(t))
 
 def sum_data(data):
     totals = {"time" : data[0]["time"]}
