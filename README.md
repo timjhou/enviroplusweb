@@ -49,7 +49,19 @@ You can now install the EnviroPlusWeb, from a Terminal window enter:
 cd
 
 git clone https://gitlab.com/idotj/enviroplusweb.git
+
+sudo pip install flask
 ```
+
+Now you are ready to run your EnviroPlusWeb. Just type: 
+
+```console
+
+sudo python3 enviroplusweb.py
+```
+
+Open your browser and type the IP address of your Raspberry Pi, example: `http://192.168.1.142/`  
+
 
 ### Setup
 
