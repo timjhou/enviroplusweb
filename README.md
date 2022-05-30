@@ -15,7 +15,8 @@ Forked from <https://github.com/nophead/EnviroPlusWeb>
 
 ### Install
 
-To use the Enviro board, you’ll need to install its Python library. Open a Terminal window and enter the following commands:
+To use the Enviro board, you’ll need to install its Python library.  
+Open a Terminal window and enter the following commands:
 
 ```console
 git clone https://github.com/pimoroni/enviroplus-python
@@ -33,6 +34,8 @@ The install script enables I2C, SPI, and serial, disables the serial console, an
 To check that everything is working correctly, go to the enviroplus-python folder and run the all-in-one example:
 
 ```console
+cd enviroplus-python
+
 cd examples
 
 python all-in-one.py
