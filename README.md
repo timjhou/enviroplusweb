@@ -56,7 +56,6 @@ sudo pip install flask
 Now you are ready to run your EnviroPlusWeb. Just type: 
 
 ```console
-
 sudo python3 enviroplusweb.py
 ```
 
