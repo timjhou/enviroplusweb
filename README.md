@@ -107,10 +107,11 @@ Maybe you want to run Enviro Plus Web at boot, then just type in the terminal:
 crontab -e
 ```
 
-Add a new entry at the very bottom with `@reboot` to specify that you want to run the command at boot, followed by the path where you clone the project. Here you have an example:
+Add a new entry at the very bottom with `@reboot` to specify that you want to run the command at boot, followed by the path where you clone the project.  
+Here you have an example:
 
 ```console
-@reboot sudo python3 /home/EnviroPlusWeb/enviroplusweb.py &
+@reboot sudo python3 /home/pi/EnviroPlusWeb/enviroplusweb.py &
 ```
 
 ## 💬 FAQ
