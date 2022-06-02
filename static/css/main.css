@@ -243,7 +243,7 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
 }
 
 .container-btn-gitlab svg {
-  stroke: unset;
+  stroke: unset !important;
 }
 
 /* Header Mobile version */
