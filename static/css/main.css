@@ -242,6 +242,10 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
   display: none;
 }
 
+.container-btn-gitlab svg {
+  stroke: unset;
+}
+
 /* Header Mobile version */
 @media screen and (min-width: 1260px) {
   .container-menu-hamburger {
