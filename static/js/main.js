@@ -80,6 +80,11 @@ const items_p = [
     max: 750,
   },
 ];
+var items = particulate_sensor
+  ? items_ngp.concat(items_g).concat(items_p)
+  : gas_sensor
+    ? items_ngp.concat(items_g)
+    : items_ngp;
 var firstLayoutRender = true;
 var containerCanvas;
 var canvas;
@@ -91,7 +96,7 @@ const yLabelHeight = 10;
 const xLabelHeight = 15;
 var xScale;
 var yScale;
-const yLabelWidth = 25;
+const yLabelWidth = 30;
 const themeLightBtn = document.getElementById("theme-light");
 const themeDarkBtn = document.getElementById("theme-dark");
 
@@ -218,6 +223,7 @@ function graph(d) {
     Dec: 11,
   };
   ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
   for (var i = 0; i < dataGraph.length; i++) {
     var fields = dataGraph[i]["time"].match(/\S+/g); // split is broken!
     var t = fields[3].split(":");
@@ -272,14 +278,12 @@ function graph(d) {
   ctx.stroke();
 
   // Plot each item
-  var items = particulate_sensor
-    ? items_ngp.concat(items_g).concat(items_p)
-    : gas_sensor
-      ? items_ngp.concat(items_g)
-      : items_ngp;
   for (var item of items) {
     ctx.strokeStyle = item.colour;
-    plotData(item.name, item.min, item.max);
+    // Plot only items with checkbox checked
+    if (document.getElementsByName(item.name)[0].checked) {
+      plotData(item.name, item.min, item.max);
+    }
     listScaleFactors(item);
   }
 
@@ -291,7 +295,7 @@ function plotData(dataSet, min, max) {
   ctx.setLineDash([]);
   y0 = canvas.height - xLabelHeight;
   // Avoid undefined error when dataGraph is empty
-  if(typeof dataGraph[0] !== 'undefined'){
+  if (typeof dataGraph[0] !== 'undefined') {
     ctx.moveTo(yLabelWidth, y0 - scaley(dataGraph[0][dataSet], min, max));
   }
   for (var i = 1; i < dataGraph.length; i++) {
@@ -329,8 +333,8 @@ menuMainBtn.addEventListener("click", function () {
   menuMainContainer.classList.toggle("menu-settings-open");
   // Detect outside click
   document.addEventListener("click", function clickOutsideMenu(event) {
-    let clickMenuContainer = menuMainContainer.contains(event.target);
-    let clickMenuBtn = menuMainBtn.contains(event.target);
+    var clickMenuContainer = menuMainContainer.contains(event.target);
+    var clickMenuBtn = menuMainBtn.contains(event.target);
     if (
       !clickMenuContainer &&
       !clickMenuBtn &&
