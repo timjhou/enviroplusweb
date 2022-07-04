@@ -1,4 +1,5 @@
 /* EnviroWebPlus */
+
 /* CSS variables */
 :root {
   --color-white: #fff;
@@ -50,6 +51,58 @@
 }
 .color-pmColor10 {
   color: var(--color-dust10);
+}
+
+/* Checkbox colors */
+.color-red input[type="checkbox"] {
+  background-color: var(--color-red);
+  outline: 1px solid var(--color-red);
+  border: 1px solid var(--color-red);
+}
+.color-blue input[type="checkbox"] {
+  background-color: var(--color-blue);
+  outline: 1px solid var(--color-blue);
+  border: 1px solid var(--color-blue);  
+}
+.color-green input[type="checkbox"] {
+  background-color: var(--color-green);
+  outline: 1px solid var(--color-green);
+  border: 1px solid var(--color-green);  
+}
+.color-yellow input[type="checkbox"] {
+  background-color: var(--color-yellow);
+  outline: 1px solid var(--color-yellow);
+  border: 1px solid var(--color-yellow);  
+}
+.color-violet input[type="checkbox"] {
+  background-color: var(--color-violet);
+  outline: 1px solid var(--color-violet);
+  border: 1px solid var(--color-violet);  
+}
+.color-orange input[type="checkbox"] {
+  background-color: var(--color-orange);
+  outline: 1px solid var(--color-orange);
+  border: 1px solid var(--color-orange);  
+}
+.color-turquoise input[type="checkbox"] {
+  background-color: var(--color-turquoise);
+  outline: 1px solid var(--color-turquoise);
+  border: 1px solid var(--color-turquoise);  
+}
+.color-pmColor100 input[type="checkbox"] {
+  background-color: var(--color-dust100);
+  outline: 1px solid var(--color-dust100);
+  border: 1px solid var(--color-dust100);  
+}
+.color-pmColor25 input[type="checkbox"] {
+  background-color: var(--color-dust25);
+  outline: 1px solid var(--color-dust25);
+  border: 1px solid var(--color-dust25);  
+}
+.color-pmColor10 input[type="checkbox"] {
+  background-color: var(--color-dust10);
+  outline: 1px solid var(--color-dust10);
+  border: 1px solid var(--color-dust10);  
 }
 
 /* Global styles */
@@ -178,7 +231,11 @@ h1 {
   animation: logo-gradient-animation 15s ease infinite;
 }
 .theme-dark h1 {
-  background: linear-gradient(160deg, var(--color-green), var(--color-gray-light));
+  background: linear-gradient(
+    160deg,
+    var(--color-green),
+    var(--color-gray-light)
+  );
   background-size: 200% 200%;
   background-clip: text;
 }
@@ -377,11 +434,16 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
   .container-readings,
   .container-graph {
     max-height: none;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
   }
   .container-readings {
     overflow: unset;
     margin-right: 0;
+    padding: 0;
+  }
+  .container-graph {
+    min-height: 20rem;
+    padding-right: 0.5rem;
   }
 }
 
@@ -404,7 +466,7 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
 .theme-dark .container-readings table:not(.scale-factors) tr:nth-child(even) {
   color: var(--color-gray);
 }
-.container-readings table span[id]{
+.container-readings table span[id] {
   padding-left: 0.5rem;
 }
 body[data-hasGasSensor="False"] .readings-gas,
@@ -456,7 +518,33 @@ body[data-hasParticulateSensor="False"] .readings-pm {
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z'/%3E%3C/svg%3E")
     no-repeat 50% 50%;
 }
-.scale-factors td {
+.container-readings table:not(.scale-factors) td {
+  padding: 0 0 0.5rem 0;
+}
+.container-readings input[type="checkbox"] {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 0.25rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.4;
+}
+.container-readings input[type="checkbox"] + label {
+  cursor: pointer;
+  opacity: 0.4;
+}
+.container-readings input[type="checkbox"]:not(:checked) {
+  background-color: transparent;
+}
+.container-readings input[type="checkbox"]:checked,
+.container-readings input[type="checkbox"]:checked + label {
+  opacity: 1;
+}
+.container-readings .scale-factors td {
   text-transform: capitalize;
 }
 
