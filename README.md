@@ -116,7 +116,7 @@ Here you have an example:
 
 ## 💬 FAQ
 
-### Where are my data readings?
+### Where are my data readings saved?
 
 Depends on where you run `enviroplusweb.py`. By default your data will be stored in the same place where you have the application, in a JSON format inside a folder called `/enviro-data`.  
 But if you run the app at bootup (for example, using the _crontab_) then your folder `/enviro-data` will be at `/home/pi` (if your default user is 'pi').
@@ -127,7 +127,7 @@ Enter `hostname -I` in a Terminal window on your Raspberry Pi, then you will see
 
 ### My Raspberry Pi is running other services at localhost
 
-You can change the port to avoind any conflict with other applications. In that case edit the file `enviroplusweb.py` and find at the end this line:
+You can change the port to avoid any conflict with other applications. In that case edit the file `enviroplusweb.py` and find at the end this line:
 
 ```python
 app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
