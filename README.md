@@ -135,6 +135,12 @@ app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
 
 Just change the `port = 80` value for another number (for example `81`) and now you can access to your EnviroPlusWeb typing the ip address followed by :81
 
+### I want to run my EnviroPlusWeb under HTTPS
+
+By default you use HTTP to connect to your Raspberry Pi through your browser, but some browsers will redirect automatically to HTTPS. If you prefer to have your project running under HTTPS here you have a tutorial explaning how to setup Flask with HTTPS:
+
+https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
+
 ## 🚀 Improve me
 
 Feel free to add/improve the app and add more features.
