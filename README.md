@@ -114,6 +114,14 @@ Here you have an example:
 @reboot sudo python3 /home/pi/enviroplusweb/enviroplusweb.py &
 ```
 
+## 🚀 Improve me
+
+Feel free to add/improve the app and add more features.
+
+## ⚖️ License
+
+GNU General Public License v3.0
+
 ## 💬 FAQ
 
 ### Where are my data readings saved?
@@ -141,10 +149,8 @@ By default you use HTTP to connect to your Raspberry Pi through your browser, bu
 
 https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
 
-## 🚀 Improve me
+### Other answered questions
 
-Feel free to add/improve the app and add more features.
+Check the [closed issues](https://gitlab.com/idotj/enviroplusweb/-/issues/?sort=created_date&state=closed&first_page_size=20), you might find your question there.  
+If nothing matches with your problem, check the [open issues](https://gitlab.com/idotj/enviroplusweb/-/issues/?sort=created_date&state=opened&first_page_size=20) or feel free to create a new one.
 
-## ⚖️ License
-
-GNU General Public License v3.0
