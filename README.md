@@ -1,7 +1,8 @@
 # 🌿 Enviro Plus Web
 
 Web interface for [Enviro](https://shop.pimoroni.com/products/enviro?variant=31155658489939) and [Enviro+](https://shop.pimoroni.com/products/enviro?variant=31155658457171) sensor board plugged into a Raspberry Pi.  
-This simple Flask application serves a web page with the current sensor readings and a graph over a specified time period.
+This simple webapp serves a page with the current sensor readings in a graph over a specified time period.  
+Runs thanks to [Flask](https://flask.palletsprojects.com) and [Chart.js](https://www.chartjs.org/)
 
 ![Screenshot](screenshot-lightTheme.jpg)
 
@@ -15,6 +16,8 @@ Forked from <https://github.com/nophead/EnviroPlusWeb>
 
 ### Install
 
+To use the Enviro board, you’ll need to install its Python library.  
+Open a Terminal window and enter the following commands:
 To use the Enviro board, you’ll need to install its Python library.  
 Open a Terminal window and enter the following commands:
 
@@ -53,14 +56,13 @@ git clone https://gitlab.com/idotj/enviroplusweb.git
 sudo pip install flask
 ```
 
-Now you are ready to run your EnviroPlusWeb. Just type: 
+Now you are ready to run your EnviroPlusWeb. Just type:
 
 ```console
 sudo python3 enviroplusweb.py
 ```
 
-Open your browser and type the IP address of your Raspberry Pi, example: `http://192.168.1.142/`  
-
+Open your browser and type the IP address of your Raspberry Pi, example: `http://192.168.1.142/`
 
 ### Setup
 
@@ -97,7 +99,7 @@ Check at the beginning of the file `enviroplusweb.py` the following lines and ch
   ```
 
 Without a fan, temperature and humidity readings are not very accurate and will vary depending on how you assambled your Enviro board with your Raspberry Pi.  
-Find an alternative device/reference to measure the temperature and humidity. Then if needed you can compensate them changing the `factor_temp` and `factor_humi` values.  
+Find an alternative device/reference to measure the temperature and humidity. Then if needed you can compensate them changing the `factor_temp` and `factor_humi` values.
 
 ### Extra setup
 

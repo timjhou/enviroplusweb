@@ -12,11 +12,11 @@
 #
 
 # If you prefer to keep the Enviro LCD screen off, change the next value to False
-lcd_screen = True
+lcd_screen = False
 # If you don't have a fan plugged on GPIO, change the next value to False
-fan_gpio = True
+fan_gpio = False
 # Temperature and humidity compensation (edit values 'factor_temp' and 'factor_humi' to adjust them)
-temp_humi_compensation = False
+temp_humi_compensation = True
 # If you have an Enviro board without gas sensor, change the next value to False
 gas_sensor = True
 # If you don't have a particle sensor PMS5003 attached, change the next value to False
@@ -230,7 +230,7 @@ def record_time(r):
     return int(t[0]) * 60 + int(t[1])
 
 # Number of 1 second samples average per file record
-samples = 300
+samples = 600
 samples_per_day = 24 * 3600 // samples
 
 def add_record(day, record):
@@ -296,7 +296,6 @@ def compress_data(ndays, nsamples):
     length = ndays * samples_per_day // nsamples
     return json.dumps(cdata[-length:])
 
-# 300 @ 1s = 5m
 # 288 @ 5m = 24h
 # 336 @ 30m = 1w
 # 372 @ 2h = 31d
@@ -337,7 +336,6 @@ if __name__ == '__main__':
         app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
     except Exception as e:
         print(e)
-        pass
     run_flag = False
     print("Waiting for background to quit")
     background_thread.join()
