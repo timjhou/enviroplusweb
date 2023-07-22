@@ -1,330 +1,373 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <title>Enviro Plus Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <meta name="keywords" content="Enviro+, EnviroPlus, RaspberryPi" />
+    <meta
+      name="description"
+      content="Web interface for Enviro+ sensor board plugged into a Raspberry Pi"
+    />
+    <meta name="theme-color" content="#b0b0b0" />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/normalize.css') }}"
+      media="all"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+      media="all"
+    />
+  </head>
 
-<head>
-  <meta charset="utf-8" />
-  <title>Enviro Plus Web</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base href="/" />
-  <meta name="keywords" content="Enviro+, EnviroPlus, RaspberryPi" />
-  <meta name="description" content="Web interface for Enviro+ sensor board plugged into a Raspberry Pi" />
-  <meta name="theme-color" content="#b0b0b0" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}" media="all" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" media="all" />
-</head>
-
-<body id="body" data-hasGasSensor="{{ gas_sensor }}" data-hasParticulateSensor="{{ particulate_sensor }}"
-  data-hasFanGPIO="{{ fan_gpio }}">
-  <script>
-    // Load user theme-color
-    const savedThemeColor = localStorage.getItem("theme-color");
-    const body = document.getElementById("body");
-    if (savedThemeColor) {
-      body.className = savedThemeColor;
-    } else {
-      if (
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-      ) {
-        body.className = "theme-dark";
+  <body
+    id="body"
+    data-hasGasSensor="{{ gas_sensor }}"
+    data-hasParticulateSensor="{{ particulate_sensor }}"
+    data-hasFanGPIO="{{ fan_gpio }}"
+  >
+    <script>
+      // Load user theme-color
+      const savedThemeColor = localStorage.getItem("theme-color");
+      const body = document.getElementById("body");
+      if (savedThemeColor) {
+        body.className = savedThemeColor;
       } else {
-        // by default
-        body.className = "theme-light";
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          body.className = "theme-dark";
+        } else {
+          body.className = "theme-light";
+        }
       }
-    }
-  </script>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-title">
-      <h1>Enviro Plus Web</h1>
-    </div>
-
-    <div class="container-menu-hamburger">
-      <button type="button" id="menu-hamburger" class="menu-hamburger" aria-label="Main menu">
-        <svg width="100%" height="100%" viewBox="0 0 100 100">
-          <path class="menu-main-hamburger menu-line1"
-            d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
-          <path class="menu-main-hamburger menu-line2" d="M 20,50 H 80" />
-          <path class="menu-main-hamburger menu-line3"
-            d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
-        </svg>
-      </button>
-    </div>
-
-    <div id="container-menu-settings" class="container-menu-settings">
-      <div class="container-info-time">
-        <span id="time"></span>
+    </script>
+    <!-- Header -->
+    <header class="header">
+      <!-- Title / logo -->
+      <div class="header-title">
+        <h1>Enviro Plus Web</h1>
       </div>
 
-      <div class="container-btn-timeRange">
-        <span class="header-icon" title="Time range">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
-            <circle cx="386" cy="210" r="20" />
+      <!-- Mobile menu -->
+      <div class="container-menu-hamburger">
+        <button
+          type="button"
+          id="menu-hamburger"
+          class="menu-hamburger"
+          aria-label="Main menu"
+        >
+          <svg width="100%" height="100%" viewBox="0 0 100 100">
             <path
-              d="M432 50h-30V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20h-99V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20h-98V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20H80c-44.112 0-70 25.888-70 70v312c0 44.112 25.888 70 70 70h153c11.046 0 20-2.954 20-14s-8.954-16-20-16H80c-22.056 0-40-17.944-40-40V120c0-22.056 17.944-40 40-40h29v20c0 11.046 4.954 20 16 20s16-8.954 16-20V80h98v20c0 11.046 4.954 20 16 20s16-8.954 16-20V80h99v20c0 11.046 4.954 20 16 20s14.901-9.009 16-20V80h30c22.056 0 40 17.944 40 40v114c0 11.046 4.954 20 16 20s14-8.954 14-20V120c0-44.112-26.018-66.617-70-70zm-41 220c-66.72 0-121 54.28-121 121s54.28 121 121 121 121-54.28 121-121-54.28-121-121-121zm0 212c-44.663 0-91-46.336-91-91s46.337-91 91-91 91 46.336 91 91-46.337 91-91 91zm25-107h-9v-25c0-11.046-4.954-20-16-20s-16 8.954-16 20v39c0 11.046 4.954 18 16 18h29c11.046 0 20-4.954 20-16s-12.954-16-24-16z" />
-            <circle cx="299" cy="210" r="20" />
-            <circle cx="212" cy="297" r="20" />
-            <circle cx="125" cy="210" r="20" />
-            <circle cx="125" cy="297" r="20" />
-            <circle cx="125" cy="384" r="20" />
-            <circle cx="212" cy="384" r="20" />
-            <circle cx="212" cy="210" r="20" />
+              class="menu-main-hamburger menu-line1"
+              d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"
+            />
+            <path class="menu-main-hamburger menu-line2" d="M 20,50 H 80" />
+            <path
+              class="menu-main-hamburger menu-line3"
+              d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"
+            />
           </svg>
-        </span>
-        <label for="graph-sel" class="visually-hidden"> Time range </label>
-        <select id="graph-sel">
-          <option value="5min" selected>5 minutes</option>
-          <option value="day">1 day</option>
-          <option value="week">1 week</option>
-          <option value="month">1 month</option>
-          <option value="year">1 year</option>
-        </select>
+        </button>
       </div>
 
-      <div class="container-btn-fanGpio">
-        <span class="header-icon" title="Fan power">
-          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"
-            aria-hidden="true" focusable="false">
-            <use xlink:href="#A" transform="matrix(1.5 0 0 1.5 -245.99999 -10.000007)" filter="url(#B)" />
-            <use xlink:href="#A" y="412" transform="matrix(1.5 0 0 1.5 -245.99999 -245.99999)" />
-            <path
-              d="M65 80a15.01 15.01 0 0 0 15-15 15.01 15.01 0 0 0-15-15 15.01 15.01 0 0 0-15 15 15.01 15.01 0 0 0 15 15zm0 0" />
-            <use xlink:href="#A" x="-412" y="412" transform="matrix(1.5 0 0 1.5 -10.000007 -245.99999)" />
-            <g>
+      <div id="container-menu-settings" class="container-menu-settings">
+        <!-- Local time -->
+        <div class="container-info-time">
+          <span id="time"></span>
+        </div>
+
+        <!-- Time range dropdown -->
+        <div class="container-btn-timeRange">
+          <span class="header-icon" title="Time range">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 512 512"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="386" cy="210" r="20" />
               <path
-                d="M458.665 4.145H53.335c-27.124 0-49.191 22.067-49.191 49.191v405.329c0 27.124 22.067 49.191 49.191 49.191h405.329c27.124 0 49.191-22.067 49.191-49.191V53.335c0-27.124-22.067-49.191-49.191-49.191zm29.514 454.52c0 16.275-13.239 29.514-29.514 29.514H53.335c-16.275 0-29.514-13.239-29.514-29.514V53.335c0-16.275 13.239-29.514 29.514-29.514h405.329c16.275 0 29.514 13.239 29.514 29.514zM367.772 174.711c0-50.424-41.025-91.45-91.45-91.45H256a10.161 10.161 0 0 0-10.161 10.161v84.734c-16.953-20.946-42.799-33.929-71.127-33.929-50.424 0-91.45 41.025-91.45 91.45V256c0 5.612 4.549 10.149 10.161 10.149h84.734c-20.946 16.957-33.929 42.812-33.929 71.14 0 50.424 41.025 91.45 91.45 91.45H256a10.161 10.161 0 0 0 10.161-10.161v-84.734c16.953 20.946 42.799 33.929 71.127 33.929 50.424 0 91.45-41.025 91.45-91.45V256a10.161 10.161 0 0 0-10.161-10.161h-84.734c20.946-16.953 33.929-42.799 33.929-71.127zm-91.45-71.127c39.22 0 71.127 31.908 71.127 71.127a71.08 71.08 0 0 1-43.189 65.428c-5.656-17.195-20.231-30.265-38.1-33.913V103.584zM257.933 286.42c-17.242 1.039-31.345-12.118-32.353-28.487-1.071-17.779 13.011-32.417 30.42-32.417 16.682 0 30.483 13.53 30.483 30.483 0 16.071-12.551 29.436-28.551 30.42zm-154.349-50.742c0-39.22 31.908-71.127 71.127-71.127a71.08 71.08 0 0 1 65.428 43.189c-17.195 5.656-30.265 20.231-33.913 38.1H103.584zm132.094 172.738c-39.22 0-71.127-31.908-71.127-71.127a71.08 71.08 0 0 1 43.189-65.428c5.656 17.195 20.231 30.265 38.1 33.913v102.643zm172.738-132.094c0 39.22-31.908 71.127-71.127 71.127a71.08 71.08 0 0 1-65.428-43.189c17.195-5.656 30.265-20.231 33.913-38.1h102.643zm0 0"
-                stroke-width="5.761" />
-              <circle cx="257.201" cy="257.229" r="207.024" fill="none" stroke-width="34.016" />
-            </g>
-            <defs>
-              <path id="A" d="M462 40c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 0" />
-              <filter id="B" x="0" width="1" y="0" height="1" color-interpolation-filters="sRGB">
-                <feGaussianBlur stdDeviation="0" />
-              </filter>
-            </defs>
-          </svg>
-        </span>
-        <label for="fan" class="visually-hidden"> Fan power </label>
-        <input id="fan" type="number" min="0" max="100" step="5" value="100" name="fan" />
+                d="M432 50h-30V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20h-99V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20h-98V30c0-11.046-4.954-20-16-20s-14.901 9.009-16 20v20H80c-44.112 0-70 25.888-70 70v312c0 44.112 25.888 70 70 70h153c11.046 0 20-2.954 20-14s-8.954-16-20-16H80c-22.056 0-40-17.944-40-40V120c0-22.056 17.944-40 40-40h29v20c0 11.046 4.954 20 16 20s16-8.954 16-20V80h98v20c0 11.046 4.954 20 16 20s16-8.954 16-20V80h99v20c0 11.046 4.954 20 16 20s14.901-9.009 16-20V80h30c22.056 0 40 17.944 40 40v114c0 11.046 4.954 20 16 20s14-8.954 14-20V120c0-44.112-26.018-66.617-70-70zm-41 220c-66.72 0-121 54.28-121 121s54.28 121 121 121 121-54.28 121-121-54.28-121-121-121zm0 212c-44.663 0-91-46.336-91-91s46.337-91 91-91 91 46.336 91 91-46.337 91-91 91zm25-107h-9v-25c0-11.046-4.954-20-16-20s-16 8.954-16 20v39c0 11.046 4.954 18 16 18h29c11.046 0 20-4.954 20-16s-12.954-16-24-16z"
+              />
+              <circle cx="299" cy="210" r="20" />
+              <circle cx="212" cy="297" r="20" />
+              <circle cx="125" cy="210" r="20" />
+              <circle cx="125" cy="297" r="20" />
+              <circle cx="125" cy="384" r="20" />
+              <circle cx="212" cy="384" r="20" />
+              <circle cx="212" cy="210" r="20" />
+            </svg>
+          </span>
+          <label for="graph-sel" class="visually-hidden"> Time range </label>
+          <select id="graph-sel">
+            <option value="day" selected>1 day</option>
+            <option value="week">1 week</option>
+            <option value="month">1 month</option>
+            <option value="year">1 year</option>
+          </select>
+        </div>
+
+        <!-- Fan speed -->
+        <div class="container-btn-fanGpio">
+          <span class="header-icon" title="Fan power">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 512 512"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <use
+                xlink:href="#A"
+                transform="matrix(1.5 0 0 1.5 -245.99999 -10.000007)"
+                filter="url(#B)"
+              />
+              <use
+                xlink:href="#A"
+                y="412"
+                transform="matrix(1.5 0 0 1.5 -245.99999 -245.99999)"
+              />
+              <path
+                d="M65 80a15.01 15.01 0 0 0 15-15 15.01 15.01 0 0 0-15-15 15.01 15.01 0 0 0-15 15 15.01 15.01 0 0 0 15 15zm0 0"
+              />
+              <use
+                xlink:href="#A"
+                x="-412"
+                y="412"
+                transform="matrix(1.5 0 0 1.5 -10.000007 -245.99999)"
+              />
+              <g>
+                <path
+                  d="M458.665 4.145H53.335c-27.124 0-49.191 22.067-49.191 49.191v405.329c0 27.124 22.067 49.191 49.191 49.191h405.329c27.124 0 49.191-22.067 49.191-49.191V53.335c0-27.124-22.067-49.191-49.191-49.191zm29.514 454.52c0 16.275-13.239 29.514-29.514 29.514H53.335c-16.275 0-29.514-13.239-29.514-29.514V53.335c0-16.275 13.239-29.514 29.514-29.514h405.329c16.275 0 29.514 13.239 29.514 29.514zM367.772 174.711c0-50.424-41.025-91.45-91.45-91.45H256a10.161 10.161 0 0 0-10.161 10.161v84.734c-16.953-20.946-42.799-33.929-71.127-33.929-50.424 0-91.45 41.025-91.45 91.45V256c0 5.612 4.549 10.149 10.161 10.149h84.734c-20.946 16.957-33.929 42.812-33.929 71.14 0 50.424 41.025 91.45 91.45 91.45H256a10.161 10.161 0 0 0 10.161-10.161v-84.734c16.953 20.946 42.799 33.929 71.127 33.929 50.424 0 91.45-41.025 91.45-91.45V256a10.161 10.161 0 0 0-10.161-10.161h-84.734c20.946-16.953 33.929-42.799 33.929-71.127zm-91.45-71.127c39.22 0 71.127 31.908 71.127 71.127a71.08 71.08 0 0 1-43.189 65.428c-5.656-17.195-20.231-30.265-38.1-33.913V103.584zM257.933 286.42c-17.242 1.039-31.345-12.118-32.353-28.487-1.071-17.779 13.011-32.417 30.42-32.417 16.682 0 30.483 13.53 30.483 30.483 0 16.071-12.551 29.436-28.551 30.42zm-154.349-50.742c0-39.22 31.908-71.127 71.127-71.127a71.08 71.08 0 0 1 65.428 43.189c-17.195 5.656-30.265 20.231-33.913 38.1H103.584zm132.094 172.738c-39.22 0-71.127-31.908-71.127-71.127a71.08 71.08 0 0 1 43.189-65.428c5.656 17.195 20.231 30.265 38.1 33.913v102.643zm172.738-132.094c0 39.22-31.908 71.127-71.127 71.127a71.08 71.08 0 0 1-65.428-43.189c17.195-5.656 30.265-20.231 33.913-38.1h102.643zm0 0"
+                  stroke-width="5.761"
+                />
+                <circle
+                  cx="257.201"
+                  cy="257.229"
+                  r="207.024"
+                  fill="none"
+                  stroke-width="34.016"
+                />
+              </g>
+              <defs>
+                <path
+                  id="A"
+                  d="M462 40c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 0"
+                />
+                <filter
+                  id="B"
+                  x="0"
+                  width="1"
+                  y="0"
+                  height="1"
+                  color-interpolation-filters="sRGB"
+                >
+                  <feGaussianBlur stdDeviation="0" />
+                </filter>
+              </defs>
+            </svg>
+          </span>
+          <label for="fan" class="visually-hidden"> Fan power </label>
+          <input
+            id="fan"
+            type="number"
+            min="0"
+            max="100"
+            step="5"
+            value="100"
+            name="fan"
+          />
+        </div>
+
+        <!-- Color Theme -->
+        <div class="container-btn-theme">
+          <button type="button" id="theme-dark" title="Change to Dark theme">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              class="button-icon-svg"
+              fill="currentColor"
+            >
+              <path
+                d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"
+              />
+            </svg>
+          </button>
+          <button type="button" id="theme-light" title="Change to Light theme">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              class="button-icon-svg"
+              fill="currentColor"
+            >
+              <path
+                d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Gitlab repository -->
+        <div class="container-btn-gitlab">
+          <a
+            href="https://gitlab.com/idotj/enviroplusweb"
+            target="_blank"
+            class="header-icon"
+            rel="noopener noreferrer"
+            title="Enviro Plus Web repo in Gitlab"
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              role="img"
+              data-v-889bdcc8=""
+              data-v-807110c0=""
+            >
+              <title>GitLab repo page</title>
+              <path
+                d="M31.4618 12.7787L31.417 12.6641L27.0667 1.31308C26.9783 1.09046 26.8218 0.90145 26.6197 0.773028C26.416 0.644476 26.1775 0.582308 25.937 0.595107C25.6965 0.607906 25.4659 0.695039 25.277 0.844481C25.0899 0.994513 24.955 1.1998 24.8915 1.43106L21.9503 10.4324H10.0509L7.10976 1.43106C7.04625 1.1998 6.91133 0.994513 6.72425 0.844481C6.53618 0.694035 6.30572 0.606246 6.06523 0.593431C5.82473 0.580616 5.58625 0.64342 5.38326 0.773028C5.18023 0.900924 5.02312 1.09005 4.9346 1.31308L0.579314 12.679L0.534448 12.792C-0.0907536 14.429 -0.167604 16.2247 0.315452 17.9091C0.798508 19.5935 1.81536 21.0756 3.21309 22.1324L3.22971 22.144L3.26793 22.1739L9.90306 27.1407L13.1832 29.625L15.1773 31.1354C15.4115 31.3124 15.6971 31.4082 15.9907 31.4082C16.2842 31.4082 16.5698 31.3124 16.8041 31.1354L18.7981 29.625L22.0799 27.1407L28.7533 22.144L28.7715 22.1307C30.174 21.0749 31.1949 19.5916 31.6802 17.9045C32.1656 16.2175 32.0889 14.4184 31.4618 12.7787Z"
+                fill="#E24329"
+              ></path>
+              <path
+                d="M31.462 12.7787L31.4172 12.6641C29.2955 13.1013 27.2962 14.0005 25.5614 15.2978L16.0083 22.5378C19.2652 25.0005 22.1001 27.1407 22.1001 27.1407L28.7734 22.144L28.7917 22.1307C30.1907 21.0723 31.2076 19.5877 31.6893 17.9009C32.171 16.214 32.0912 14.4163 31.462 12.7787Z"
+                fill="#FC6D26"
+              ></path>
+              <path
+                d="M9.9082 27.1407L13.1834 29.625L15.1774 31.1354C15.4117 31.3124 15.6972 31.4082 15.9908 31.4082C16.2844 31.4082 16.57 31.3124 16.8042 31.1354L18.7982 29.625L22.0801 27.1407C22.0801 27.1407 19.2452 25.0005 15.9883 22.5378L9.9082 27.1407Z"
+                fill="#FCA326"
+              ></path>
+              <path
+                d="M6.43513 15.3045C4.70076 14.0067 2.70123 13.108 0.579333 12.6724L0.534467 12.7854C-0.0923403 14.4232 -0.170036 16.2203 0.313079 17.9061C0.796194 19.5919 1.81396 21.0751 3.21311 22.1324L3.22973 22.144L3.26795 22.1739L9.90307 27.1407L16.0081 22.5378L6.43513 15.3045Z"
+                fill="#FC6D26"
+              ></path>
+            </svg>
+          </a>
+        </div>
       </div>
+    </header>
 
-      <div class="container-btn-theme">
-        <button type="button" id="theme-dark" title="Change to Dark theme">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="button-icon-svg" fill="currentColor">
-            <path
-              d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278zM4.858 1.311A7.269 7.269 0 0 0 1.025 7.71c0 4.02 3.279 7.276 7.319 7.276a7.316 7.316 0 0 0 5.205-2.162c-.337.042-.68.063-1.029.063-4.61 0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z" />
-          </svg>
-        </button>
-        <button type="button" id="theme-light" title="Change to Light theme">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="button-icon-svg" fill="currentColor">
-            <path
-              d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z" />
-          </svg>
-        </button>
+    <!-- Main content -->
+    <main class="main">
+      <div class="graphs-container">
+        <!-- Temperature -->
+        <div class="graph-container graph-temp">
+          <div class="graph-header">
+            <h2 class="color-red">▣ Temperature:</h2>
+            <div class="graph-header-readings">
+              <div>
+                <span id="temp">-</span>&deg;C &nbsp;⸱&nbsp;
+                <span id="temp-f">-</span>&deg;F
+              </div>
+            </div>
+          </div>
+          <div class="graph-chart">
+            <canvas id="graphChartTemp" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
+        <!-- Humidity -->
+        <div class="graph-container graph-humi">
+          <div class="graph-header">
+            <h2 class="color-blue">▣ Humidity:</h2>
+            <div class="graph-header-readings">
+              <div><span id="humi">-</span>%</div>
+            </div>
+          </div>
+          <div class="graph-chart">
+            <canvas id="graphChartHumi" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
+        <!-- Pressure -->
+        <div class="graph-container graph-pres">
+          <div class="graph-header">
+            <h2 class="color-green">▣ Pressure:</h2>
+            <div class="graph-header-readings">
+              <div><span id="pres">-</span>&nbsp;hPa</div>
+            </div>
+          </div>
+          <div class="graph-chart">
+            <canvas id="graphChartPres" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
+        <!-- Light -->
+        <div class="graph-container graph-lux">
+          <div class="graph-header">
+            <h2 class="color-yellow">▣ Light:</h2>
+            <div class="graph-header-readings">
+              <div><span id="lux">-</span>&nbsp;lux</div>
+            </div>
+          </div>
+          <div class="graph-chart">
+            <canvas id="graphChartLux" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
+        <!-- Gas -->
+        <div class="graph-container graph-gas">
+          <div class="graph-header">
+            <h2>Gas:</h2>
+            <div class="graph-header-readings">
+              <div>
+                <span class="color-violet">▣ NH<sub>3</sub></span>
+                <span id="nh3">-</span>&nbsp;kΩ
+              </div>
+              <div>
+                <span class="color-orange">▣ Reducing</span>
+                <span id="red">-</span>&nbsp;kΩ
+              </div>
+              <div>
+                <span class="color-turquoise">▣ Oxidising</span>
+                <span id="oxi">-</span>&nbsp;kΩ
+              </div>
+            </div>
+          </div>
+
+          <div class="graph-chart">
+            <canvas id="graphChartGas" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
+        <!-- Particulate matter -->
+        <div class="graph-container graph-pm">
+          <div class="graph-header">
+            <h2>Particulate matter:</h2>
+            <div class="graph-header-readings">
+              <div>
+                <span class="color-pmColor100">▣ PM<sub>10.0</sub></span>
+                <span id="pm100">-</span>μg/m<sup>3</sup>
+              </div>
+              <div>
+                <span class="color-pmColor25">▣ PM<sub>2.5</sub></span>
+                <span id="pm25">-</span>μg/m<sup>3</sup>
+              </div>
+              <div>
+                <span class="color-pmColor10">▣ PM<sub>1.0</sub></span>
+                <span id="pm10">-</span>μg/m<sup>3</sup>
+              </div>
+            </div>
+          </div>
+
+          <div class="graph-chart">
+            <canvas id="graphChartPm" class="loading-spinner"></canvas>
+          </div>
+        </div>
       </div>
+    </main>
 
-      <div class="container-btn-gitlab">
-        <a href="https://gitlab.com/idotj/enviroplusweb" target="_blank" class="header-icon" rel="noopener noreferrer"
-          title="Enviro Plus Web repo in Gitlab">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" role="img"
-            data-v-889bdcc8="" data-v-807110c0="">
-            <title>GitLab repo page</title>
-            <path
-              d="M31.4618 12.7787L31.417 12.6641L27.0667 1.31308C26.9783 1.09046 26.8218 0.90145 26.6197 0.773028C26.416 0.644476 26.1775 0.582308 25.937 0.595107C25.6965 0.607906 25.4659 0.695039 25.277 0.844481C25.0899 0.994513 24.955 1.1998 24.8915 1.43106L21.9503 10.4324H10.0509L7.10976 1.43106C7.04625 1.1998 6.91133 0.994513 6.72425 0.844481C6.53618 0.694035 6.30572 0.606246 6.06523 0.593431C5.82473 0.580616 5.58625 0.64342 5.38326 0.773028C5.18023 0.900924 5.02312 1.09005 4.9346 1.31308L0.579314 12.679L0.534448 12.792C-0.0907536 14.429 -0.167604 16.2247 0.315452 17.9091C0.798508 19.5935 1.81536 21.0756 3.21309 22.1324L3.22971 22.144L3.26793 22.1739L9.90306 27.1407L13.1832 29.625L15.1773 31.1354C15.4115 31.3124 15.6971 31.4082 15.9907 31.4082C16.2842 31.4082 16.5698 31.3124 16.8041 31.1354L18.7981 29.625L22.0799 27.1407L28.7533 22.144L28.7715 22.1307C30.174 21.0749 31.1949 19.5916 31.6802 17.9045C32.1656 16.2175 32.0889 14.4184 31.4618 12.7787Z"
-              fill="#E24329"></path>
-            <path
-              d="M31.462 12.7787L31.4172 12.6641C29.2955 13.1013 27.2962 14.0005 25.5614 15.2978L16.0083 22.5378C19.2652 25.0005 22.1001 27.1407 22.1001 27.1407L28.7734 22.144L28.7917 22.1307C30.1907 21.0723 31.2076 19.5877 31.6893 17.9009C32.171 16.214 32.0912 14.4163 31.462 12.7787Z"
-              fill="#FC6D26"></path>
-            <path
-              d="M9.9082 27.1407L13.1834 29.625L15.1774 31.1354C15.4117 31.3124 15.6972 31.4082 15.9908 31.4082C16.2844 31.4082 16.57 31.3124 16.8042 31.1354L18.7982 29.625L22.0801 27.1407C22.0801 27.1407 19.2452 25.0005 15.9883 22.5378L9.9082 27.1407Z"
-              fill="#FCA326"></path>
-            <path
-              d="M6.43513 15.3045C4.70076 14.0067 2.70123 13.108 0.579333 12.6724L0.534467 12.7854C-0.0923403 14.4232 -0.170036 16.2203 0.313079 17.9061C0.796194 19.5919 1.81396 21.0751 3.21311 22.1324L3.22973 22.144L3.26795 22.1739L9.90307 27.1407L16.0081 22.5378L6.43513 15.3045Z"
-              fill="#FC6D26"></path>
-          </svg>
-        </a>
-      </div>
-    </div>
-
-  </header>
-
-  <!-- Main content -->
-  <main class="main">
-    <div class="container-readings">
-      <table>
-        <tbody>
-          <tr>
-            <td class="color-red">
-              <input id="temp-checkbox" type="checkbox" name="temp" onclick="getGraph(true)" checked>
-              <label for="temp-checkbox">
-                Temperature
-              </label>
-            </td>
-            <td><span id="temp">-</span>&deg;C</td>
-          </tr>
-          <tr>
-            <td class="color-blue">
-              <input id="humi-checkbox" type="checkbox" name="humi" onclick="getGraph(true)" checked>
-              <label for="humi-checkbox">
-                Humidity
-              </label>
-            </td>
-            <td><span id="humi">-</span>%</td>
-          </tr>
-          <tr>
-            <td class="color-green">
-              <input id="pres-checkbox" type="checkbox" name="pres" onclick="getGraph(true)" checked>
-              <label for="pres-checkbox">
-                Pressure
-              </label>
-            </td>
-            <td><span id="pres">-</span>&nbsp;hPa</td>
-          </tr>
-          <tr>
-            <td class="color-yellow">
-              <input id="lux-checkbox" type="checkbox" name="lux" onclick="getGraph(true)" checked>
-              <label for="lux-checkbox">
-                Light
-              </label>
-            </td>
-            <td><span id="lux">-</span>&nbsp;lux</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <details class="readings-gas">
-        <summary>Gas</summary>
-        <table>
-          <tbody>
-            <tr>
-              <td class="color-violet">
-                <input id="nh3-checkbox" type="checkbox" name="nh3" onclick="getGraph(true)" checked>
-                <label for="nh3-checkbox">
-                  NH<sub>3</sub>
-                </label>
-              </td>
-              <td><span id="nh3">-</span>&nbsp;kΩ</td>
-            </tr>
-            <tr>
-              <td class="color-orange">
-                <input id="red-checkbox" type="checkbox" name="red" onclick="getGraph(true)" checked>
-                <label for="red-checkbox">
-                  Reducing
-                </label>
-              </td>
-              <td><span id="red">-</span>&nbsp;kΩ</td>
-            </tr>
-            <tr>
-              <td class="color-turquoise">
-                <input id="oxi-checkbox" type="checkbox" name="oxi" onclick="getGraph(true)" checked>
-                <label for="oxi-checkbox">
-                  Oxidising
-                </label>
-              </td>
-              <td><span id="oxi">-</span>&nbsp;kΩ</td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-      <details class="readings-pm">
-        <summary>Particulate matter</summary>
-        <table>
-          <tbody>
-            <tr>
-              <td class="color-pmColor100">
-                <input id="pm100-checkbox" type="checkbox" name="pm100" onclick="getGraph(true)" checked>
-                <label for="pm100-checkbox">
-                  PM<sub>10.0</sub>
-                </label>
-              </td>
-              <td><span id="pm100">-</span>μg/m<sup>3</sup></td>
-            </tr>
-            <tr>
-              <td class="color-pmColor25">
-                <input id="pm25-checkbox" type="checkbox" name="pm25" onclick="getGraph(true)" checked>
-                <label for="pm25-checkbox">
-                  PM<sub>2.5</sub>
-                </label>
-              </td>
-              <td><span id="pm25">-</span>μg/m<sup>3</sup></td>
-            </tr>
-            <tr>
-              <td class="color-pmColor10">
-                <input id="pm10-checkbox" type="checkbox" name="pm10" onclick="getGraph(true)" checked>
-                <label for="pm10-checkbox">
-                  PM<sub>1.0</sub>
-                </label>
-              </td>
-              <td><span id="pm10">-</span>μg/m<sup>3</sup></td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-
-      <details>
-        <summary>Scale factors</summary>
-        <table class="scale-factors">
-          <tbody id="scale-factors-tbody">
-            <tr>
-              <td><span class="color-red">Temperature</span></td>
-              <td><span id="temp-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-blue">Humidity</span></td>
-              <td><span id="humi-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-green">Pressure</span></td>
-              <td><span id="pres-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-yellow">Light</span></td>
-              <td><span id="lux-scale">-</span></td>
-            </tr>
-            <tr></tr>
-            <tr></tr>
-            <tr>
-              <td>
-                <span class="color-violet">NH<sub>3</sub></span>
-              </td>
-              <td><span id="nh3-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-orange">Reducing</span></td>
-              <td><span id="red-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-turquoise">Oxidising</span></td>
-              <td><span id="oxi-scale">-</span></td>
-            </tr>
-            <tr></tr>
-            <tr></tr>
-            <tr>
-              <td><span class="color-pmColor100">PM<sub>10.0</sub></span></td>
-              <td><span id="pm100-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-pmColor25">PM<sub>2.5</sub></span></td>
-              <td><span id="pm25-scale">-</span></td>
-            </tr>
-            <tr>
-              <td><span class="color-pmColor10">PM<sub>1.0</sub></span></td>
-              <td><span id="pm10-scale">-</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </details>
-    </div>
-
-    <div id="container-graph" class="container-graph">
-      <canvas id="canvas-graph"></canvas>
-    </div>
-  </main>
-
-  <!-- Javascript -->
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-
+    <!-- Javascript -->
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chartjs-adapter-date-fns.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
 </html>

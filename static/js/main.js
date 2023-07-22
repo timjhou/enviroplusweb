@@ -1,6 +1,5 @@
 /* EnviroPlusWeb */
 const frequencies = {
-  "5min": { major: 300, minor: 60, poll: 1 },
   day: { major: 3 * 3600, minor: 3600, poll: 60 },
   week: { major: 24 * 3600, minor: 6 * 3600, poll: 600 },
   month: { major: 7 * 24 * 3600, minor: 24 * 3600, poll: 1440 },
@@ -9,118 +8,137 @@ const frequencies = {
 const gas_sensor = body.dataset.hasgassensor;
 const particulate_sensor = body.dataset.hasparticulatesensor;
 const fan_gpio = body.dataset.hasfangpio;
-var last_frequency = "";
-var last_graph = 0;
-var hasThemeLight = body.classList.contains("theme-light");
+let hasThemeLight = body.classList.contains("theme-light");
+const themeLightBtn = document.getElementById("theme-light");
+const themeDarkBtn = document.getElementById("theme-dark");
 const style = getComputedStyle(document.body);
 // All colors values are declared at main.css
-const items_ngp = [
-  {
-    name: "temp",
-    colour: style.getPropertyValue("--color-red"),
+const items_ngp = {
+  temp: {
+    id: "temp",
+    label: "Temperature",
+    unit: "°C",
+    color: style.getPropertyValue("--color-red"),
     min: 0,
     max: 50,
   },
-  {
-    name: "humi",
-    colour: style.getPropertyValue("--color-blue"),
+  humi: {
+    id: "humi",
+    label: "Humidity",
+    unit: "%",
+    color: style.getPropertyValue("--color-blue"),
     min: 0,
     max: 100,
   },
-  {
-    name: "pres",
-    colour: style.getPropertyValue("--color-green"),
+  pres: {
+    id: "pres",
+    label: "Pressure",
+    unit: "hPa",
+    color: style.getPropertyValue("--color-green"),
     min: 950,
     max: 1050,
   },
-  {
-    name: "lux",
-    colour: style.getPropertyValue("--color-yellow"),
+  lux: {
+    id: "lux",
+    label: "Light",
+    unit: "lux",
+    color: style.getPropertyValue("--color-yellow"),
     min: 0,
     max: 25000,
   },
-];
-const items_g = [
-  {
-    name: "nh3",
-    colour: style.getPropertyValue("--color-violet"),
+};
+const items_gas = {
+  nh3: {
+    id: "nh3",
+    label: "NH3",
+    unit: "kΩ",
+    color: style.getPropertyValue("--color-violet"),
     min: 0,
     max: 600,
   },
-  {
-    name: "oxi",
-    colour: style.getPropertyValue("--color-turquoise"),
+  oxi: {
+    id: "red",
+    label: "Reducing",
+    unit: "kΩ",
+    color: style.getPropertyValue("--color-turquoise"),
     min: 0,
     max: 400,
   },
-  {
-    name: "red",
-    colour: style.getPropertyValue("--color-orange"),
+  red: {
+    id: "oxi",
+    label: "Oxidising",
+    unit: "kΩ",
+    color: style.getPropertyValue("--color-orange"),
     min: 0,
     max: 1000,
+  },
+};
+const items_pm = {
+  pm10: {
+    id: "pm10",
+    label: "PM10.0",
+    unit: "μg/m3",
+    color: style.getPropertyValue("--color-dust10"),
+    min: 0,
+    max: 750,
+  },
+  pm25: {
+    id: "pm25",
+    label: "PM2.5",
+    unit: "μg/m3",
+    color: style.getPropertyValue("--color-dust25"),
+    min: 0,
+    max: 750,
+  },
+  pm100: {
+    id: "pm100",
+    label: "PM100",
+    unit: "μg/m3",
+    color: style.getPropertyValue("--color-dust100"),
+    min: 0,
+    max: 750,
+  },
+};
+let items;
+if (particulate_sensor) {
+  items = { ...items_ngp, ...items_gas, ...items_pm };
+} else {
+  if (gas_sensor) {
+    items = { ...items_ngp, ...items_gas };
+  } else {
+    items = items_ngp;
   }
-];
-const items_p = [
-  {
-    name: "pm10",
-    colour: style.getPropertyValue("--color-dust10"),
-    min: 0,
-    max: 750,
-  },
-  {
-    name: "pm25",
-    colour: style.getPropertyValue("--color-dust25"),
-    min: 0,
-    max: 750,
-  },
-  {
-    name: "pm100",
-    colour: style.getPropertyValue("--color-dust100"),
-    min: 0,
-    max: 750,
-  },
-];
-var items = particulate_sensor
-  ? items_ngp.concat(items_g).concat(items_p)
-  : gas_sensor
-    ? items_ngp.concat(items_g)
-    : items_ngp;
-var firstLayoutRender = true;
-var containerCanvas;
-var canvas;
-var ctx;
-var dataGraph;
-var dataReadings;
-const yScaleSteps = 10;
-const yLabelHeight = 10;
-const xLabelHeight = 15;
-var xScale;
-var yScale;
-const yLabelWidth = 30;
-const themeLightBtn = document.getElementById("theme-light");
-const themeDarkBtn = document.getElementById("theme-dark");
-
-// Manages theme color
-function changeColorTheme() {
-  body.className = this.id;
-  localStorage.setItem("theme-color", this.id);
-  hasThemeLight = !hasThemeLight;
-  getGraph(true);
 }
-themeLightBtn.onclick = changeColorTheme;
-themeDarkBtn.onclick = changeColorTheme;
+let firstRun = true;
+let dataReadings;
+let transformedData;
+let frequency;
+let last_frequency = "";
+let last_graph = 0;
+const ctxTemp = document.getElementById("graphChartTemp");
+const ctxHumi = document.getElementById("graphChartHumi");
+const ctxPres = document.getElementById("graphChartPres");
+const ctxLux = document.getElementById("graphChartLux");
+const ctxGas = document.getElementById("graphChartGas");
+const ctxPm = document.getElementById("graphChartPm");
+let graphChartTemp;
+let graphChartHumi;
+let graphChartPres;
+let graphChartLux;
+let graphChartGas;
+let graphChartPm;
 
-// Request to get the readings data
+// Request to get readings data
 function getData() {
-  var xhttp = new XMLHttpRequest();
+  let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      // console.log('Readings data: ', JSON.parse(this.responseText));
+      // console.log('getData(): ', JSON.parse(this.responseText));
       listReadings(JSON.parse(this.responseText));
     }
   };
   if (fan_gpio) {
-    var fan = document.getElementById("fan").value;
+    let fan = document.getElementById("fan").value;
     xhttp.open("GET", "readings?fan=" + fan, true);
   } else {
     xhttp.open("GET", "readings", true);
@@ -128,162 +146,330 @@ function getData() {
   xhttp.send();
 }
 
-// Load the data in the readings tables
+// Show live readings data in readings tables
 function listReadings(d) {
   dataReadings = d;
-  for (var i = 0; i < Object.keys(dataReadings).length; i++) {
-    var dataKey = Object.keys(dataReadings)[i];
-    var elementIdKey = document.getElementById(dataKey);
-    var dataValue = Object.values(dataReadings)[i];
+  for (let i = 0; i < Object.keys(dataReadings).length; i++) {
+    let dataKey = Object.keys(dataReadings)[i];
+    let elementIdKey = document.getElementById(dataKey);
+    let dataValue = Object.values(dataReadings)[i];
     if (typeof elementIdKey != "undefined" && elementIdKey != null) {
       elementIdKey.innerHTML = dataValue;
-      /*
-      if(dataKey === 'time'){
-        // Transform date and time in local format
-        elementIdKey.innerHTML = new Date(dataValue).toLocaleString(navigator.language);
-      }else{
-        elementIdKey.innerHTML = dataValue;
+      if (dataKey === "temp") {
+        const temp_f = dataValue * 1.8 + 32;
+        document.getElementById("temp-f").innerHTML = temp_f.toFixed(1);
       }
-      */
     }
   }
 }
 
-// Load the scale factors in the readings tables
-function listScaleFactors(item) {
-  var itemIdKey = document.getElementById(item.name + '-scale');
-  var itemValue = (item.max - item.min);
-  if (typeof itemIdKey != "undefined" && itemIdKey != null) {
-    itemIdKey.innerHTML = '/' + itemValue;
-  }
-}
-
-// Request to get the graph data
-function getGraph(param) {
-  var frequency = document.getElementById("graph-sel").value;
-  var t = Date.now() / 1000;
+// Request to get graph data
+function getGraph() {
+  frequency = document.getElementById("graph-sel").value;
+  let t = Date.now() / 1000;
   if (
     frequency != last_frequency ||
-    t - last_graph >= frequencies[frequency].poll ||
-    param
+    t - last_graph >= frequencies[frequency].poll
   ) {
     last_frequency = frequency;
     last_graph = t;
-    var xhttp = new XMLHttpRequest();
+    let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
-        // console.log('Graph data: ', JSON.parse(this.responseText))
-        graph(JSON.parse(this.responseText));
+        // console.log('getGraph(): ', JSON.parse(this.responseText));
+        transformedData = JSON.parse(this.responseText).map((element) => {
+          return {
+            // Normalize data for the graph
+            time: new Date(element.time).toISOString(),
+            temp: element.temp,
+            humi: element.humi,
+            pres: element.pres,
+            lux: element.lux,
+            nh3: element.nh3,
+            red: element.red,
+            oxi: element.oxi,
+            pm10: element.pm10,
+            pm100: element.pm100,
+            pm25: element.pm25,
+          };
+        });
+
+        if (!firstRun) {
+          destroyAllCharts();
+        } else {
+          firstRun = false;
+        }
+        drawGraph(transformedData);
       }
     };
+
     xhttp.open("GET", "graph?time=" + frequency, true);
     xhttp.send();
   }
 }
 
-// Draw the background grid and labels
-function graph(d) {
-  dataGraph = d;
-  containerCanvas = document.getElementById("container-graph");
-  canvas = document.getElementById("canvas-graph");
-  if (firstLayoutRender) {
-    canvas.height = containerCanvas.offsetHeight;
-    canvas.width = containerCanvas.offsetWidth;
-    firstLayoutRender = false;
+// Reload graph chart
+function destroyAllCharts() {
+  graphChartTemp.destroy();
+  graphChartHumi.destroy();
+  graphChartPres.destroy();
+  graphChartLux.destroy();
+  if (gas_sensor) graphChartGas.destroy();
+  if (particulate_sensor) graphChartPm.destroy();
+}
+
+// Draw graph with data
+function drawGraph(data) {
+  // console.log("drawGraph(): ", data);
+
+  // Change time range to read better the X axis
+  let graphfrequency;
+  switch (frequency) {
+    case "day":
+      graphfrequency = "hour";
+      break;
+    case "week":
+      graphfrequency = "day";
+      break;
+    case "month":
+      graphfrequency = "day";
+      break;
+    case "year":
+      graphfrequency = "month";
+      break;
+    default:
+      graphfrequency = frequency;
+      break;
   }
 
-  ctx = canvas.getContext("2d");
-  // Color of the graph labels
-  ctx.fillStyle = hasThemeLight
-    ? style.getPropertyValue("--color-gray")
-    : style.getPropertyValue("--color-gray-dark");
-  ctx.font = "20 pt Verdana";
+  // Push data for chartJS
+  graphChartTemp = new Chart(ctxTemp, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.temp.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.temp.id,
+          },
+          borderColor: items.temp.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.temp.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.9,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          grace: "90%",
+          ticks: {
+            callback: function (value) {
+              return value + items.temp.unit;
+            },
+          },
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxTemp.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 
-  yScale = canvas.height - yLabelHeight - xLabelHeight;
-  xScale = (canvas.width - yLabelWidth) / (dataGraph.length - 1);
+  graphChartHumi = new Chart(ctxHumi, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.humi.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.humi.id,
+          },
+          borderColor: items.humi.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.humi.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.3,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          grace: "90%",
+          ticks: {
+            stepSize: 5,
+            callback: function (value) {
+              return value + items.humi.unit;
+            },
+          },
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxHumi.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  // Print X axis vertical time lines
-  var frequency = document.getElementById("graph-sel").value;
-  var major = frequencies[frequency].major;
-  var minor = frequencies[frequency].minor;
-  var show_date = major >= 24 * 3600;
-  const months = {
-    Jan: 0,
-    Feb: 1,
-    Mar: 2,
-    Apr: 3,
-    May: 4,
-    Jun: 5,
-    Jul: 6,
-    Aug: 7,
-    Sep: 8,
-    Oct: 9,
-    Nov: 10,
-    Dec: 11,
-  };
-  ctx.textAlign = "center";
-  ctx.textBaseline = "bottom";
-  for (var i = 0; i < dataGraph.length; i++) {
-    var fields = dataGraph[i]["time"].match(/\S+/g); // split is broken!
-    var t = fields[3].split(":");
-    var date = months[fields[1]] * 31 + parseInt(fields[2]) - 1;
-    var time =
-      date * 24 * 3600 +
-      parseInt(t[0]) * 3600 +
-      parseInt(t[1]) * 60 +
-      parseInt(t[2]);
-    if (time % minor == 0) {
-      var is_major = time % major == 0;
-      var x = i * xScale + yLabelWidth;
-      if (is_major)
-        ctx.fillText(
-          show_date
-            ? fields[0] + " " + fields[1] + " " + fields[2]
-            : fields[3].slice(0, 5),
-          x,
-          canvas.height
-        );
-      ctx.beginPath();
-      // Color of vertical grid lines
-      if (hasThemeLight) {
-        ctx.strokeStyle = is_major
-          ? style.getPropertyValue("--color-gray")
-          : style.getPropertyValue("--color-gray-light");
-      } else {
-        ctx.strokeStyle = is_major
-          ? style.getPropertyValue("--color-gray-dark")
-          : style.getPropertyValue("--color-gray-darker");
-      }
-      ctx.setLineDash([5, 3]);
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height - xLabelHeight);
-      ctx.stroke();
-    }
-  }
+  graphChartPres = new Chart(ctxPres, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.pres.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.pres.id,
+          },
+          fill: items.pres.color,
+          borderColor: items.pres.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.pres.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.6,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: items.pres.min,
+          max: items.pres.max,
+          ticks: {
+            stepSize: 20,
+            callback: function (value) {
+              return value + " " + items.pres.unit;
+            },
+          },
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxPres.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 
-  // Print Y axis labels and draw horizontal grid lines
-  ctx.beginPath();
-  // Color of horizontal grid lines
-  ctx.strokeStyle = hasThemeLight
-    ? style.getPropertyValue("--color-gray-light")
-    : style.getPropertyValue("--color-gray-darker");
-  ctx.textAlign = "left";
-  for (var i = 0; i <= yScaleSteps; i++) {
-    var y = (yScale * (yScaleSteps - i)) / yScaleSteps + yLabelHeight - 1;
-    ctx.fillText(i / yScaleSteps, yLabelHeight, y);
-    ctx.moveTo(yLabelWidth, y);
-    ctx.lineTo(canvas.width, y);
-  }
-  ctx.stroke();
+  graphChartLux = new Chart(ctxLux, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.lux.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.lux.id,
+          },
+          borderColor: items.lux.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.lux.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.2,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grace: "40%",
+          ticks: {
+            stepSize: 100,
+            callback: function (value) {
+              return value + " " + items.lux.unit;
+            },
+          },
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxLux.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 
   // Plot each item
+  var items = particulate_sensor
+    ? items_ngp.concat(items_g).concat(items_p)
+    : gas_sensor
+      ? items_ngp.concat(items_g)
+      : items_ngp;
   for (var item of items) {
     ctx.strokeStyle = item.colour;
-    // Plot only items with checkbox checked
-    if (document.getElementsByName(item.name)[0].checked) {
-      plotData(item.name, item.min, item.max);
-    }
+    plotData(item.name, item.min, item.max);
     listScaleFactors(item);
   }
 
@@ -295,7 +481,7 @@ function plotData(dataSet, min, max) {
   ctx.setLineDash([]);
   y0 = canvas.height - xLabelHeight;
   // Avoid undefined error when dataGraph is empty
-  if (typeof dataGraph[0] !== 'undefined') {
+  if(typeof dataGraph[0] !== 'undefined'){
     ctx.moveTo(yLabelWidth, y0 - scaley(dataGraph[0][dataSet], min, max));
   }
   for (var i = 1; i < dataGraph.length; i++) {
@@ -304,24 +490,16 @@ function plotData(dataSet, min, max) {
       y0 - scaley(dataGraph[i][dataSet], min, max)
     );
   }
-  ctx.stroke();
 }
 
-// Calculate the place on the Y axis between the ranges min/max
-function scaley(y, min, max) {
-  return ((y - min) * yScale) / (max - min);
+// Manages theme color
+function changeColorTheme() {
+  body.className = this.id;
+  localStorage.setItem("theme-color", this.id);
+  hasThemeLight = !hasThemeLight;
 }
-
-// Update the graph layout (width/height) if window resize
-window.addEventListener('resize', function () {
-  var resizeId;
-  clearTimeout(resizeId);
-  resizeId = setTimeout(doneResizing, 500);
-});
-function doneResizing() {
-  firstLayoutRender = true;
-  getGraph(true);
-}
+themeLightBtn.onclick = changeColorTheme;
+themeDarkBtn.onclick = changeColorTheme;
 
 // Control main menu (mobile)
 const menuMainBtn = document.getElementById("menu-hamburger");
@@ -357,3 +535,8 @@ setInterval(function () {
   getData();
   getGraph();
 }, 900); // ~1s update rate
+
+window.addEventListener("resize", function(){
+  destroyAllCharts();
+  drawGraph(transformedData);
+});
