@@ -18,8 +18,6 @@ Forked from <https://github.com/nophead/EnviroPlusWeb>
 
 To use the Enviro board, you’ll need to install its Python library.  
 Open a Terminal window and enter the following commands:
-To use the Enviro board, you’ll need to install its Python library.  
-Open a Terminal window and enter the following commands:
 
 ```console
 git clone https://github.com/pimoroni/enviroplus-python
