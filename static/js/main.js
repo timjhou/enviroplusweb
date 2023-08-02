@@ -461,35 +461,179 @@ function drawGraph(data) {
     },
   });
 
-  // Plot each item
-  var items = particulate_sensor
-    ? items_ngp.concat(items_g).concat(items_p)
-    : gas_sensor
-      ? items_ngp.concat(items_g)
-      : items_ngp;
-  for (var item of items) {
-    ctx.strokeStyle = item.colour;
-    plotData(item.name, item.min, item.max);
-    listScaleFactors(item);
-  }
+graphChartGas = new Chart(ctxGas, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.nh3.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.nh3.id,
+          },
+          yAxisID: "y",
+          borderColor: items.nh3.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.nh3.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.red.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.red.id,
+          },
+          yAxisID: "y1",
+          borderColor: items.red.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.red.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.oxi.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.oxi.id,
+          },
+          yAxisID: "y2",
+          borderColor: items.oxi.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.oxi.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.2,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: items.oxi.min,
+          max: items.oxi.max,
+          ticks: {
+            callback: function (value) {
+              return value + " " + items.oxi.unit;
+            },
+          },
+        },
+        y1: {
+          display: false,
+        },
+        y2: {
+          display: false,
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxGas.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 
-}
-
-// Draw each reading value on the grid
-function plotData(dataSet, min, max) {
-  ctx.beginPath();
-  ctx.setLineDash([]);
-  y0 = canvas.height - xLabelHeight;
-  // Avoid undefined error when dataGraph is empty
-  if(typeof dataGraph[0] !== 'undefined'){
-    ctx.moveTo(yLabelWidth, y0 - scaley(dataGraph[0][dataSet], min, max));
-  }
-  for (var i = 1; i < dataGraph.length; i++) {
-    ctx.lineTo(
-      yLabelWidth + i * xScale,
-      y0 - scaley(dataGraph[i][dataSet], min, max)
-    );
-  }
+  graphChartPm = new Chart(ctxPm, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.pm10.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.pm10.id,
+          },
+          yAxisID: "y",
+          borderColor: items.pm10.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.pm10.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.pm100.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.pm100.id,
+          },
+          yAxisID: "y1",
+          borderColor: items.pm100.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.pm100.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.pm25.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.pm25.id,
+          },
+          yAxisID: "y2",
+          borderColor: items.pm25.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.pm25.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.2,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: items.pm10.min,
+          max: items.pm10.max,
+          ticks: {
+            callback: function (value) {
+              return value + " " + items.pm100.unit;
+            },
+          },
+        },
+        y1: {
+          min: items.pm100.min,
+          max: items.pm100.max,
+          display: false,
+        },
+        y2: {
+          min: items.pm25.min,
+          max: items.pm25.max,
+          display: false,
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxPm.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
 }
 
 // Manages theme color
@@ -511,8 +655,8 @@ menuMainBtn.addEventListener("click", function () {
   menuMainContainer.classList.toggle("menu-settings-open");
   // Detect outside click
   document.addEventListener("click", function clickOutsideMenu(event) {
-    var clickMenuContainer = menuMainContainer.contains(event.target);
-    var clickMenuBtn = menuMainBtn.contains(event.target);
+    let clickMenuContainer = menuMainContainer.contains(event.target);
+    let clickMenuBtn = menuMainBtn.contains(event.target);
     if (
       !clickMenuContainer &&
       !clickMenuBtn &&
