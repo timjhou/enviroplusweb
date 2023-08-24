@@ -108,10 +108,10 @@ if lcd_screen:
             "%",
             "hPa",
             "Lux",
-            "High",
-            "Mid",
-            "Low",
-            "Amp"]
+            "u",
+            "u",
+            "u",
+            "u"]
 
     if gas_sensor:
         units += [

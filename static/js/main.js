@@ -167,7 +167,7 @@ function getData() {
   let xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
-      console.log('getData(): ', JSON.parse(this.responseText));
+      // console.log('getData(): ', JSON.parse(this.responseText));
       listReadings(JSON.parse(this.responseText));
     }
   };
@@ -259,7 +259,7 @@ function destroyAllCharts() {
 
 // Draw graph with data
 function drawGraph(data) {
-  console.log("drawGraph(): ", data);
+  // console.log("drawGraph(): ", data);
 
   // Change time range to read better the X axis
   let graphfrequency;
@@ -579,7 +579,7 @@ function drawGraph(data) {
       },
       animation: {
         onComplete: function () {
-          ctxGas.classList.remove("loading-spinner");
+          ctxNoise.classList.remove("loading-spinner");
         },
       },
     },
