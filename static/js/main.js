@@ -180,7 +180,7 @@ function getData() {
   xhttp.send();
 }
 
-// Show live readings data in readings tables
+// Show live readings in 
 function listReadings(d) {
   dataReadings = d;
   for (let i = 0; i < Object.keys(dataReadings).length; i++) {
@@ -210,7 +210,7 @@ function getGraph() {
     let xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
-        // console.log('getGraph(): ', JSON.parse(this.responseText));
+        console.log('getGraph(): ', JSON.parse(this.responseText));
         transformedData = JSON.parse(this.responseText).map((element) => {
           return {
             // Normalize data for the graph
