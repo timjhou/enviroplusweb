@@ -84,7 +84,7 @@ const items_gas = {
     id: "nh3",
     label: "NH3",
     unit: "kΩ",
-    color: style.getPropertyValue("--color-violet"),
+    color: style.getPropertyValue("--color-olive"),
     min: 0,
     max: 600,
   },
@@ -259,7 +259,7 @@ function destroyAllCharts() {
 
 // Draw graph with data
 function drawGraph(data) {
-  // console.log("drawGraph(): ", data);
+  console.log("drawGraph(): ", data);
 
   // Change time range to read better the X axis
   let graphfrequency;
