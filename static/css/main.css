@@ -13,7 +13,11 @@
   --color-blue: #0177c0;
   --color-green: #568211;
   --color-yellow: #f5b60f;
-  --color-violet: #693fa3;
+  --color-noise-low: #441398;
+  --color-noise-mid: #622697;
+  --color-noise-high: #771e9b;
+  --color-noise-amp: #800080;
+  --color-olive: #808000;
   --color-orange: #c45300;
   --color-turquoise: #40826c;
   --color-dust100: #57473a;
@@ -40,8 +44,20 @@
 .color-yellow {
   color: var(--color-yellow);
 }
-.color-violet {
-  color: var(--color-violet);
+.color-noise-high {
+  color: var(--color-noise-high);
+}
+.color-noise-mid {
+  color: var(--color-noise-mid);
+}
+.color-noise-low {
+  color: var(--color-noise-low);
+}
+.color-noise-amp {
+  color: var(--color-noise-amp);
+}
+.color-olive {
+  color: var(--color-olive);
 }
 .color-orange {
   color: var(--color-orange);
@@ -57,58 +73,6 @@
 }
 .color-pmColor10 {
   color: var(--color-dust10);
-}
-
-/* Checkbox colors */
-.color-red input[type="checkbox"] {
-  background-color: var(--color-red);
-  outline: 1px solid var(--color-red);
-  border: 1px solid var(--color-red);
-}
-.color-blue input[type="checkbox"] {
-  background-color: var(--color-blue);
-  outline: 1px solid var(--color-blue);
-  border: 1px solid var(--color-blue);  
-}
-.color-green input[type="checkbox"] {
-  background-color: var(--color-green);
-  outline: 1px solid var(--color-green);
-  border: 1px solid var(--color-green);  
-}
-.color-yellow input[type="checkbox"] {
-  background-color: var(--color-yellow);
-  outline: 1px solid var(--color-yellow);
-  border: 1px solid var(--color-yellow);  
-}
-.color-violet input[type="checkbox"] {
-  background-color: var(--color-violet);
-  outline: 1px solid var(--color-violet);
-  border: 1px solid var(--color-violet);  
-}
-.color-orange input[type="checkbox"] {
-  background-color: var(--color-orange);
-  outline: 1px solid var(--color-orange);
-  border: 1px solid var(--color-orange);  
-}
-.color-turquoise input[type="checkbox"] {
-  background-color: var(--color-turquoise);
-  outline: 1px solid var(--color-turquoise);
-  border: 1px solid var(--color-turquoise);  
-}
-.color-pmColor100 input[type="checkbox"] {
-  background-color: var(--color-dust100);
-  outline: 1px solid var(--color-dust100);
-  border: 1px solid var(--color-dust100);  
-}
-.color-pmColor25 input[type="checkbox"] {
-  background-color: var(--color-dust25);
-  outline: 1px solid var(--color-dust25);
-  border: 1px solid var(--color-dust25);  
-}
-.color-pmColor10 input[type="checkbox"] {
-  background-color: var(--color-dust10);
-  outline: 1px solid var(--color-dust10);
-  border: 1px solid var(--color-dust10);  
 }
 
 /* Global styles */
@@ -427,6 +391,7 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
   grid-template-areas:
     "temp humi"
     "pres lux"
+    "noise noise"
     "gas gas"
     "pm pm"
     ". .";
@@ -442,6 +407,7 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
       "humi"
       "pres"
       "lux"
+      "noise"
       "gas"
       "pm"
       ".";
@@ -461,6 +427,9 @@ body[data-hasFanGPIO="False"] .container-btn-fanGpio {
 }
 .graph-lux {
   grid-area: lux;
+}
+.graph-noise {
+  grid-area: noise;
 }
 .graph-gas {
   grid-area: gas;

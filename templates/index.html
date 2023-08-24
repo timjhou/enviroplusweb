@@ -313,13 +313,42 @@
           </div>
         </div>
 
+        <!-- Noise -->
+        <div class="graph-container graph-noise">
+          <div class="graph-header">
+            <h2>Noise:</h2>
+            <div class="graph-header-readings">
+              <div>
+                <span class="color-noise-high">▣ High</span>
+                <span id="noiseHigh">-</span>&nbsp;db
+              </div>
+              <div>
+                <span class="color-noise-mid">▣ Mid</span>
+                <span id="noiseMid">-</span>&nbsp;db
+              </div>
+              <div>
+                <span class="color-noise-low">▣ Low</span>
+                <span id="noiseLow">-</span>&nbsp;db
+              </div>
+              <div>
+                <span class="color-noise-amp">▣ Amp</span>
+                <span id="noiseAmp">-</span>&nbsp;db
+              </div>              
+            </div>
+          </div>
+
+          <div class="graph-chart">
+            <canvas id="graphChartNoise" class="loading-spinner"></canvas>
+          </div>
+        </div>
+
         <!-- Gas -->
         <div class="graph-container graph-gas">
           <div class="graph-header">
             <h2>Gas:</h2>
             <div class="graph-header-readings">
               <div>
-                <span class="color-violet">▣ NH<sub>3</sub></span>
+                <span class="color-olive">▣ NH<sub>3</sub></span>
                 <span id="nh3">-</span>&nbsp;kΩ
               </div>
               <div>

@@ -108,9 +108,9 @@ if lcd_screen:
             "%",
             "hPa",
             "Lux",
-            "Low",
-            "Mid",
             "High",
+            "Mid",
+            "Low",
             "Amp"]
 
     if gas_sensor:
@@ -207,10 +207,10 @@ def read_data(time):
         'humi' : round(humidity,1),
         'pres' : round(pressure,1),
         'lux'  : round(lux),
-        'amp'  : round(amp,2),
         'high' : round(high,2),
         'mid'  : round(mid,2),
         'low'  : round(low,2),
+        'amp'  : round(amp,2),        
         'oxi'  : oxi,
         'red'  : red,
         'nh3'  : nh3,

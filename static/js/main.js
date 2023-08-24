@@ -46,6 +46,38 @@ const items_ngp = {
     min: 0,
     max: 25000,
   },
+  high: {
+    id: "high",
+    label: "High",
+    unit: "db",
+    color: style.getPropertyValue("--color-noise-high"),
+    min: 0,
+    max: 1000,
+  },
+  mid: {
+    id: "mid",
+    label: "Mid",
+    unit: "db",
+    color: style.getPropertyValue("--color-noise-mid"),
+    min: 0,
+    max: 1000,
+  },
+  low: {
+    id: "low",
+    label: "Low",
+    unit: "db",
+    color: style.getPropertyValue("--color-noise-low"),
+    min: 0,
+    max: 1000,
+  },
+  amp: {
+    id: "amp",
+    label: "Amp",
+    unit: "db",
+    color: style.getPropertyValue("--color-noise-amp"),
+    min: 0,
+    max: 1000,
+  },
 };
 const items_gas = {
   nh3: {
@@ -119,11 +151,13 @@ const ctxTemp = document.getElementById("graphChartTemp");
 const ctxHumi = document.getElementById("graphChartHumi");
 const ctxPres = document.getElementById("graphChartPres");
 const ctxLux = document.getElementById("graphChartLux");
+const ctxNoise = document.getElementById("graphChartNoise");
 const ctxGas = document.getElementById("graphChartGas");
 const ctxPm = document.getElementById("graphChartPm");
 let graphChartTemp;
 let graphChartHumi;
 let graphChartPres;
+let graphChartNoise;
 let graphChartLux;
 let graphChartGas;
 let graphChartPm;
@@ -185,6 +219,10 @@ function getGraph() {
             humi: element.humi,
             pres: element.pres,
             lux: element.lux,
+            high: element.high,
+            mid: element.mid,
+            low: element.low,
+            amp: element.amp,
             nh3: element.nh3,
             red: element.red,
             oxi: element.oxi,
@@ -214,6 +252,7 @@ function destroyAllCharts() {
   graphChartHumi.destroy();
   graphChartPres.destroy();
   graphChartLux.destroy();
+  graphChartNoise.destroy();
   if (gas_sensor) graphChartGas.destroy();
   if (particulate_sensor) graphChartPm.destroy();
 }
@@ -461,7 +500,92 @@ function drawGraph(data) {
     },
   });
 
-graphChartGas = new Chart(ctxGas, {
+  graphChartNoise = new Chart(ctxNoise, {
+    type: "line",
+    data: {
+      datasets: [
+        {
+          label: items.high.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.high.id,
+          },
+          yAxisID: "y",
+          borderColor: items.high.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.high.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.mid.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.mid.id,
+          },
+          yAxisID: "y1",
+          borderColor: items.mid.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.mid.color,
+          pointRadius: 1,
+        },
+        {
+          label: items.low.id,
+          data: data,
+          parsing: {
+            yAxisKey: items.low.id,
+          },
+          yAxisID: "y2",
+          borderColor: items.low.color,
+          borderWidth: 2,
+          pointBackgroundColor: items.low.color,
+          pointRadius: 1,
+        },
+      ],
+    },
+    options: {
+      bezierCurve: true,
+      tension: 0.2,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: items.high.min,
+          max: items.high.max,
+          ticks: {
+            callback: function (value) {
+              return value + " " + items.high.unit;
+            },
+          },
+        },
+        y1: {
+          display: false,
+        },
+        y2: {
+          display: false,
+        },
+        x: {
+          type: "time",
+          time: {
+            unit: graphfrequency,
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false,
+        },
+      },
+      parsing: {
+        xAxisKey: "time",
+      },
+      animation: {
+        onComplete: function () {
+          ctxGas.classList.remove("loading-spinner");
+        },
+      },
+    },
+  });
+
+  graphChartGas = new Chart(ctxGas, {
     type: "line",
     data: {
       datasets: [
@@ -680,7 +804,7 @@ setInterval(function () {
   getGraph();
 }, 900); // ~1s update rate
 
-window.addEventListener("resize", function(){
+window.addEventListener("resize", function () {
   destroyAllCharts();
   drawGraph(transformedData);
 });
