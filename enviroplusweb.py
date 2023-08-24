@@ -12,7 +12,7 @@
 #
 
 # If you prefer to keep the Enviro LCD screen off, change the next value to False
-lcd_screen = True
+lcd_screen = False
 # If you don't have a fan plugged on GPIO, change the next value to False
 fan_gpio = True
 # Temperature and humidity compensation (edit values 'factor_temp' and 'factor_humi' to adjust them)
