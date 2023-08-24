@@ -49,7 +49,7 @@ const items_ngp = {
   high: {
     id: "high",
     label: "High",
-    unit: "db",
+    unit: "u",
     color: style.getPropertyValue("--color-noise-high"),
     min: 0,
     max: 1000,
@@ -57,7 +57,7 @@ const items_ngp = {
   mid: {
     id: "mid",
     label: "Mid",
-    unit: "db",
+    unit: "u",
     color: style.getPropertyValue("--color-noise-mid"),
     min: 0,
     max: 1000,
@@ -65,7 +65,7 @@ const items_ngp = {
   low: {
     id: "low",
     label: "Low",
-    unit: "db",
+    unit: "u",
     color: style.getPropertyValue("--color-noise-low"),
     min: 0,
     max: 1000,
@@ -73,7 +73,7 @@ const items_ngp = {
   amp: {
     id: "amp",
     label: "Amp",
-    unit: "db",
+    unit: "u",
     color: style.getPropertyValue("--color-noise-amp"),
     min: 0,
     max: 1000,
@@ -157,8 +157,8 @@ const ctxPm = document.getElementById("graphChartPm");
 let graphChartTemp;
 let graphChartHumi;
 let graphChartPres;
-let graphChartNoise;
 let graphChartLux;
+let graphChartNoise;
 let graphChartGas;
 let graphChartPm;
 
