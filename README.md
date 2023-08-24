@@ -147,10 +147,9 @@ Just change the `port = 80` value for another number (for example `81`) and now 
 
 By default you use HTTP to connect to your Raspberry Pi through your browser, but some browsers will redirect automatically to HTTPS. If you prefer to have your project running under HTTPS here you have a tutorial explaning how to setup Flask with HTTPS:
 
-https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
+<https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https>
 
 ### Other answered questions
 
 Check the [closed issues](https://gitlab.com/idotj/enviroplusweb/-/issues/?sort=created_date&state=closed&first_page_size=20), you might find your question there.  
 If nothing matches with your problem, check the [open issues](https://gitlab.com/idotj/enviroplusweb/-/issues/?sort=created_date&state=opened&first_page_size=20) or feel free to create a new one.
-
