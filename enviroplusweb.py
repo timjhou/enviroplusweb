@@ -33,7 +33,6 @@ try:
 except ImportError:
     import ltr559
 from enviroplus import gas
-from enviroplus.noise import Noise
 from pms5003 import PMS5003, ReadTimeoutError as pmsReadTimeoutError
 import threading
 from time import sleep, time, asctime, localtime, strftime, gmtime
@@ -56,8 +55,6 @@ bus = SMBus(1)
 bme280 = BME280(i2c_dev=bus)
 # PMS5003 particulate sensor
 pms5003 = PMS5003()
-# Noise sensor
-noise = Noise()
 
 # Config the fan plugged to RPi
 if fan_gpio:
@@ -104,14 +101,10 @@ if lcd_screen:
     x_offset = 2
     y_offset = 2
 
-    units = ["°C",
+    units = ["C",
             "%",
             "hPa",
-            "Lux",
-            "u",
-            "u",
-            "u",
-            "u"]
+            "Lux"]
 
     if gas_sensor:
         units += [
@@ -121,9 +114,9 @@ if lcd_screen:
 
     if particulate_sensor:
         units += [
-            "μg/m3",
-            "μg/m3",
-            "μg/m3"]
+            "ug/m3",
+            "ug/m3",
+            "ug/m3"]
 
     # Displays all the text on the 0.96" LCD
     def display_everything():
@@ -169,12 +162,6 @@ def read_data(time):
 
     pressure = bme280.get_pressure()
     lux = ltr559.get_lux()
-    low, mid, high, amp = noise.get_noise_profile()
-    low *= 128
-    mid *= 128
-    high *= 128
-    amp *= 64
-
 
     if gas_sensor:
         gases = gas.read_all()
@@ -207,10 +194,6 @@ def read_data(time):
         'humi' : round(humidity,1),
         'pres' : round(pressure,1),
         'lux'  : round(lux),
-        'high' : round(high,2),
-        'mid'  : round(mid,2),
-        'low'  : round(low,2),
-        'amp'  : round(amp,2),        
         'oxi'  : oxi,
         'red'  : red,
         'nh3'  : nh3,
@@ -350,7 +333,7 @@ if __name__ == '__main__':
         days.append(read_day('enviro-data/' + f))
     background_thread.start()
     try:
-        app.run(debug = False, host = '0.0.0.0', port = 5000, use_reloader = False)
+        app.run(debug = False, host = '0.0.0.0', port = 80, use_reloader = False)
     except Exception as e:
         print(e)
     run_flag = False
